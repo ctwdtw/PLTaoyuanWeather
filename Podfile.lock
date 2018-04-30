@@ -1,0 +1,48 @@
+PODS:
+  - Alamofire (4.6.0)
+  - CodableAlamofire (1.1.0):
+    - Alamofire (~> 4.0)
+  - Reusable (4.0.1):
+    - Reusable/Storyboard (= 4.0.1)
+    - Reusable/View (= 4.0.1)
+  - Reusable/Storyboard (4.0.1)
+  - Reusable/View (4.0.1)
+  - SwiftSoup (1.7.1)
+
+DEPENDENCIES:
+  - Alamofire (from `https://github.com/Alamofire/Alamofire.git`, commit `bc973c5`)
+  - CodableAlamofire (from `https://github.com/Otbivnoe/CodableAlamofire`, commit `dcbbb9e`)
+  - Reusable (from `https://github.com/ctwdtw/Reusable.git`, commit `c271af2`)
+  - SwiftSoup
+
+EXTERNAL SOURCES:
+  Alamofire:
+    :commit: bc973c5
+    :git: https://github.com/Alamofire/Alamofire.git
+  CodableAlamofire:
+    :commit: dcbbb9e
+    :git: https://github.com/Otbivnoe/CodableAlamofire
+  Reusable:
+    :commit: c271af2
+    :git: https://github.com/ctwdtw/Reusable.git
+
+CHECKOUT OPTIONS:
+  Alamofire:
+    :commit: bc973c5
+    :git: https://github.com/Alamofire/Alamofire.git
+  CodableAlamofire:
+    :commit: dcbbb9e
+    :git: https://github.com/Otbivnoe/CodableAlamofire
+  Reusable:
+    :commit: c271af2
+    :git: https://github.com/ctwdtw/Reusable.git
+
+SPEC CHECKSUMS:
+  Alamofire: 0dda98a0ed7eec4bdcd5fe3cdd35fcd2b3022825
+  CodableAlamofire: 2183509f080b5ef2d50b19ce8274cbc21bee5dfc
+  Reusable: 3531383aa0f4ed12aed3c68546332b25b84889aa
+  SwiftSoup: 277f7ef548826e0ca7603a06b30d4a5df3ee0587
+
+PODFILE CHECKSUM: 95c96eefa53befacb33fc322d79524c8168a72a8
+
+COCOAPODS: 1.4.0

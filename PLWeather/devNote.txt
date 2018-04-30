@@ -1,0 +1,24 @@
+//
+//  devNote.swift
+//  PLWeather
+//
+//  Created by Paul Lee on 2018/4/18.
+//  Copyright © 2018年 Paul Lee. All rights reserved.
+//
+
+
+tableView reload vs tableView reload at indexPaths 差異在哪？
+
+1.增刪一筆新的資料到 model array 後, 如果 relaod at indexPaths 似乎會有 inconsistent 的 NSException 被丟出
+1.a 是否要對應到 UI 上 tableView insert Row ＝> 是的, 正確步驟 I. inser model II. tableView.insertRow(at idxPath)
+2.修改一筆資料後, 例如在 cell 上的愛心點選 like or unlike 後可以用 reload at indexPaths 不會 crash
+
+4/28
+基礎建設架設好, 基本功能完成, 待處理：
+0. git
+1. error display (the only handling here)
+2. 找尋適當位置, 把background 執行的 function dispatch 回 main queue <--- 由 UI ViewController 自行 dispatch....
+3. 刪除功能
+4. UI
+5. Realm
+

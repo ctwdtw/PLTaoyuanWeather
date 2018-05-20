@@ -31,6 +31,9 @@ struct DisplayedWeather {
 struct DisplayedForecast {
   let displayedDate: String
   let displayedWeathers: [DisplayedWeather]
+  static func empty() -> DisplayedForecast {
+    return DisplayedForecast(displayedDate: "", displayedWeathers: [])
+  }
 }
 
 struct DisplayedError {
@@ -43,6 +46,9 @@ struct DisplayedQuote {
   let displayedDate: String
   let author: String
   let quote: String
+  static func empty() -> DisplayedQuote {
+    return DisplayedQuote(id: "", displayedDate: "", author: "", quote: "")
+  }
 }
 
 struct WeatherQuoteViewModel {

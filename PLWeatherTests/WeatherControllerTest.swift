@@ -26,10 +26,16 @@ class WeatherControllerTest: XCTestCase {
     sut.fetchDataOnLoad { (viewModel) in
       ithFetch = ithFetch + 1
       if ithFetch == 1 { //fetchFromLocal
-        
+        XCTAssertNotNil(viewModel.displayedQuote)
+        XCTAssertNotNil(viewModel.displayedForecast)
+        XCTAssertNil(viewModel.displayedError)
+      
       } else if ithFetch == 2 { //fetchFromRemote
         XCTAssertNotNil(viewModel.displayedQuote)
+        XCTAssertNotNil(viewModel.displayedForecast)
+        XCTAssertNil(viewModel.displayedError)
         exp.fulfill()
+      
       }
     
     }
@@ -37,14 +43,14 @@ class WeatherControllerTest: XCTestCase {
     wait(for: [exp], timeout: 5000)
   }
   
-  
   func test_pullToRefreshData_whenSuccess_hasData() {
     let exp = expectation(description: "pull_to_fresh")
     //when
     sut.pullToRefreshData { (viewModel) in
       //then
       XCTAssertNotNil(viewModel.displayedQuote)
-      
+      XCTAssertNotNil(viewModel.displayedForecast)
+      XCTAssertNil(viewModel.displayedError)
       exp.fulfill()
     }
     

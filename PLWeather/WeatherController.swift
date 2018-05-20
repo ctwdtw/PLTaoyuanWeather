@@ -93,47 +93,23 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   
   //FIXME :- performance issue: use `objectForID` to reduce frequency of fetching
   //fetch is expensive
-  private func fetchLocalQuoteAndForecast(completion: @escaping (WeatherQuoteViewModel) -> Void) {
+  func fetchLocalQuoteAndForecast(completion: @escaping (WeatherQuoteViewModel) -> Void) {
   
-    localStore.fetchDaliyQuote { (quote, error) in
-      guard let localQuote = quote else {
-        //TODO: - hanlde error
-        //return vm with error
-        
-        let displayedError = DisplayedError(title: "PLError", errorMessage: "PLMessage")
-        let vm = WeatherQuoteViewModel(displayedQuote: nil, displayedForecast: nil, displayedError: displayedError)
-        completion(vm)
-        return
-      }
+    localStore.fetchDaliyQuote { (quote, quoteError) in
       
-      let displayedQuote = self.getDisplayedQuote(from: localQuote)
-      
-      self.localStore.fetchForecast { (forecast, error) in
-        guard let localForecast = forecast else {
-          //TODO: - hanlde error
-          //return vm with error
-          let displayedError = DisplayedError(title: "PLError", errorMessage: "PLMessage")
-          let vm = WeatherQuoteViewModel(displayedQuote: nil, displayedForecast: nil, displayedError: displayedError)
-          completion(vm)
-          return
-        }
+      self.localStore.fetchForecast { (forecast, forecastError) in
         
-        let displayedForecast = self.getDisplayedForecast(from: localForecast)
         
-        let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
-                                       displayedForecast: displayedForecast,
-                                       displayedError: nil)
-        
+        let vm = self.getWeatherQuoteViewModel(quote: quote,
+                                          quoteError: quoteError,
+                                          forecast: forecast,
+                                          forecastError: forecastError)
         completion(vm)
         
       }
-      
     }
   }
   
-  //TODO:// improved error handling, 只有其中一個 request 發生 error 的時候不結束整個抓取資料的程序
-  //例如 dailyQuote 崩潰的時候，仍然顯示天氣預報。
-  //
   private func updateLocalData(completion: @escaping (Quote?, PLErrorProtocol?, Forecast?, PLErrorProtocol?) -> Void) {
     guard isUpdatingLocaldata == false else {
       return //cancel upate for this time
@@ -156,6 +132,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         print("wait for update local forecast")
       }
     }
+    
     updateLocalForecast { updatedForecast, error in
       
       forecastUpdatedError = error
@@ -339,9 +316,9 @@ extension WeatherController {
     //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
     
     let displayedError = DisplayedError(title: "抓取資料錯誤", errorMessage: "無法抓取天氣預報和每日一句資料")
-    // TODO:// displayedQuote, displayedForecast 不該回傳nil, 應該回傳 UI 上的 edge case
-    let vm = WeatherQuoteViewModel(displayedQuote: nil, displayedForecast: nil, displayedError: displayedError)
-    
+    let vm = WeatherQuoteViewModel(displayedQuote: DisplayedQuote.empty(),
+                                   displayedForecast: DisplayedForecast.empty(),
+                                   displayedError: displayedError)
     return vm
     
   }
@@ -350,11 +327,9 @@ extension WeatherController {
                                             forecast: Forecast) -> WeatherQuoteViewModel {
     let displayedError = DisplayedError(title: "無法抓取每日一句", errorMessage: quoteError.localizedDescription)
     let displayedForecast = getDisplayedForecast(from: forecast)
-    // TODO:// displayedQuote 不該回傳nil, 應該回傳 UI 上的 edge case
-    let vm = WeatherQuoteViewModel(displayedQuote: nil,
+    let vm = WeatherQuoteViewModel(displayedQuote: DisplayedQuote.empty(),
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
-    
     return vm
   }
   
@@ -362,11 +337,9 @@ extension WeatherController {
                                       forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
     let displayedQuote = getDisplayedQuote(from: quote)
     let displayedError = DisplayedError(title: "無法抓取氣象資料", errorMessage: forecastError.localizedDescription)
-    // TODO:// displayedForecast 不該回傳nil, 應該回傳 UI 上的 edge case
     let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
-                                   displayedForecast: nil,
+                                   displayedForecast: DisplayedForecast.empty(),
                                    displayedError: displayedError)
-    
     return vm
   }
   

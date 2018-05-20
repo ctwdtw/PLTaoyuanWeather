@@ -137,7 +137,7 @@ extension APIDataStore {
     
     //quote
     let quoteText = try quote.text()
-    //TODO:// - what is the appropreate id for quote?
+    //quote.id = "20150520", something like this.
     return Quote(id: dateTimeText, date: date, author: authorText, quote: quoteText)
     
   }

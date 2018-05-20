@@ -22,60 +22,55 @@ class WeatherControllerTest: XCTestCase {
   
   func test_fetchDataOnLoad_whenSuccess_hasData() {
     let exp = expectation(description: "fetch_data_on_load")
-    var timer = 0
+    var ithFetch = 0
     sut.fetchDataOnLoad { (viewModel) in
-      timer = timer + 1
-      if timer == 1 {
+      ithFetch = ithFetch + 1
+      if ithFetch == 1 { //fetchFromLocal
         
-      } else if timer == 2 {
+      } else if ithFetch == 2 { //fetchFromRemote
         XCTAssertNotNil(viewModel.displayedQuote)
-        print("timer=\(timer), author\(viewModel.displayedQuote?.author)")
-        print(viewModel.displayedForecast?.displayedWeathers[0].displayedHighestTemprature)
         exp.fulfill()
       }
     
     }
     
-    
     wait(for: [exp], timeout: 5000)
   }
+  
+  
+  func test_pullToRefreshData_whenSuccess_hasData() {
+    let exp = expectation(description: "pull_to_fresh")
+    //when
+    sut.pullToRefreshData { (viewModel) in
+      //then
+      XCTAssertNotNil(viewModel.displayedQuote)
+      
+      exp.fulfill()
+    }
+    
+    wait(for: [exp], timeout: 5)
+  }
+
   
   func test_pullToRefreshData_whenQuoteSuspened_returnDisplayedSuspendQuote() {
     //given
     let remoteInjected = APIDataStoreInjectionWrapper(dailyQuoteUrlString: "https://tw.appledaily.com/index/dailyquote/date/20160419")
     let remoteStore = APIDataStore()
     remoteStore.inject(remoteInjected)
+    
     let injected = WatherControllerInjectionWrapper(remoteStore: remoteStore)
     sut.inject(injected)
     
     //when
     let exp = expectation(description: "return_suspened_quote")
     sut.pullToRefreshData { (vm) in
-      XCTAssertNil(vm.displayedQuote?.author)
+      XCTAssertEqual(vm.displayedQuote?.author, "")
       XCTAssertNotNil(vm.displayedQuote?.quote)
-      print(vm.displayedQuote?.quote)
       exp.fulfill()
     }
     wait(for: [exp], timeout: 5)
     
   }
-  
-  func test_pullToRefreshData_whenSuccess_hasData() {
-    let exp = expectation(description: "pull_to_fresh")
-    
-    //when
-    sut.pullToRefreshData { (viewModel) in
-      //then
-      XCTAssertNotNil(viewModel.displayedQuote)
-      print(viewModel.displayedQuote?.author)
-      exp.fulfill()
-    }
-    
-    wait(for: [exp], timeout: 5)
-    
-  }
-  
-  
   
   
 }

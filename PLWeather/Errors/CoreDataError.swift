@@ -8,7 +8,7 @@
 
 import Foundation
 enum CoreDataError: PLErrorProtocol {
-  case emptyFetch
+  //case emptyFetch
   case uninterpretedError(Error)
 }
 
@@ -19,8 +19,8 @@ extension CoreDataError {
 extension CoreDataError {
   var code: Int {
     switch self {
-    case .emptyFetch:
-      return  -10002
+//    case .emptyFetch:
+//      return  -10002
     case .uninterpretedError(let error as NSError):
       return error.code
       
@@ -47,8 +47,8 @@ extension CoreDataError {
 extension CoreDataError {
   var localizedDescription: String {
     switch self {
-    case .emptyFetch:
-      return  "沒有資料"
+//    case .emptyFetch:
+//      return  "沒有資料"
     case .uninterpretedError(let error as NSError):
       return error.localizedDescription
       

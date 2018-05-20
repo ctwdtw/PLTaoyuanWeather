@@ -82,7 +82,8 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
           let forecast = managedForecast.toForecast()
           completion(forecast, nil)
         } else {
-          completion(nil, CoreDataError.emptyFetch)
+          //completion(nil, CoreDataError.emptyFetch)
+          completion(nil, nil)
         }
         
       } catch {
@@ -129,7 +130,8 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
           let quote = managedQuote.toQuote()
           completion(quote, nil)
         } else {
-          completion(nil, CoreDataError.emptyFetch)
+          //completion(nil, CoreDataError.emptyFetch)
+          completion(nil, nil)
         }
         
         try context.save() // propagate managedObject to view context

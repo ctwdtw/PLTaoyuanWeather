@@ -40,8 +40,8 @@ struct DisplayedError {
 
 struct DisplayedQuote {
   let id: String
-  let displayedDate: String!
-  let author: String!
+  let displayedDate: String
+  let author: String
   let quote: String
 }
 

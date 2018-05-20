@@ -66,7 +66,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   //業務邏輯
   //a. fetchOnLoad
   //1. show local 資料給 view, 打包好 Local Quote & Local Forecast 給 View
-  //2. 由 remote 端抓取資料, 若比 Local 端, 就插入資料進入 CoreData
+  //2. 由 remote 端抓取資料, 若比 Local 端新, 就插入資料進入 CoreData
   //3. 將最新資料傳遞給 View
   
   //b. pull to fetch
@@ -80,21 +80,21 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   }
   
   func pullToRefreshData(completion: @escaping (WeatherQuoteViewModel) -> Void) {
-    updateLocalData { quoteUpdatedError, forecastUpdatedError in
-      guard quoteUpdatedError == nil, forecastUpdatedError == nil else {
-        // TODO:// formate suitable vm,
-        //1. forecast failed, dailyQuote did not failed
-        //2. forecast did not failed, dailyQuote failed
-        //3. both failed.
-        return
-      }
-      //self.fetchLocalQuoteAndForecast(completion: completion)
+    updateLocalData { updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
+      
+      let vm = self.getWeatherQuoteViewModel(quote: updatedQuote,
+                                             quoteError: quoteUpdatedError,
+                                             forecast: updatedForecast,
+                                             forecastError: forecastUpdatedError)
+      completion(vm)
+      
     }
   }
   
   //FIXME :- performance issue: use `objectForID` to reduce frequency of fetching
   //fetch is expensive
   private func fetchLocalQuoteAndForecast(completion: @escaping (WeatherQuoteViewModel) -> Void) {
+  
     localStore.fetchDaliyQuote { (quote, error) in
       guard let localQuote = quote else {
         //TODO: - hanlde error
@@ -134,33 +134,35 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   //TODO:// improved error handling, 只有其中一個 request 發生 error 的時候不結束整個抓取資料的程序
   //例如 dailyQuote 崩潰的時候，仍然顯示天氣預報。
   //
-  private func updateLocalData(completion: @escaping (PLErrorProtocol?, PLErrorProtocol?) -> Void) {
-  //private func updateLocalData(completion: @escaping (PLErrorProtocol?) -> Void) {
+  private func updateLocalData(completion: @escaping (Quote?, PLErrorProtocol?, Forecast?, PLErrorProtocol?) -> Void) {
     guard isUpdatingLocaldata == false else {
-      //cancel upate for this time
-      return
+      return //cancel upate for this time
     }
     
+    var quote: Quote? = nil
+    var forecast: Forecast? = nil
     var quoteUpdatedError: PLErrorProtocol? = nil
     var forecastUpdatedError: PLErrorProtocol? = nil
     
     //asyncly fire remoteRequest
-    updateLocalQuote { error in
+    updateLocalQuote { updatedQuote, error in
       
       quoteUpdatedError = error
+      quote = updatedQuote
       
       if self.isUpdatingLocaldata == false {
-        completion(quoteUpdatedError, forecastUpdatedError) //(nil, nil) is success
+        completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
       } else {
         print("wait for update local forecast")
       }
     }
-    updateLocalForecast { error in
+    updateLocalForecast { updatedForecast, error in
       
       forecastUpdatedError = error
+      forecast = updatedForecast
       
       if self.isUpdatingLocaldata == false {
-        completion(quoteUpdatedError, forecastUpdatedError) //(nil, nil) is success
+        completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
       } else {
         print("wait for update local quote")
       }
@@ -168,46 +170,44 @@ extension WeatherController: WeatherQuoteControllerProtocol {
     
   }
   
-  private func updateLocalForecast(completion: @escaping (PLErrorProtocol?) -> Void) {
+  private func updateLocalForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     isUpdatingLocalForecast = true
     remoteStore.fetchForecast { (forecast, error) in
       guard let remoteForecast = forecast else {
-        //error
         self.isUpdatingLocalForecast = false
-        completion(error)
+        completion(nil, error) //web related error
         return
       }
       
       if let lastupdate = self.localStore.lastupdateDateForForecast,
         lastupdate >= remoteForecast.lastupdate {
         self.isUpdatingLocalForecast = false
-        completion(nil)
+        completion(nil, nil)
         return
       }
       
       self.localStore.insertForecast(remoteForecast) { (error) in
         guard error == nil else {
-          //error
           self.isUpdatingLocalForecast = false
+          completion(nil, error) //local data store related error
           return
         }
         
         //happy path
         self.isUpdatingLocalForecast = false
-        completion(nil)
+        completion(remoteForecast, nil)
         
       }
       
     }
   }
   
-  private func updateLocalQuote(completion: @escaping (PLErrorProtocol?) -> Void) {
+  private func updateLocalQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void) {
     isUpdatingLocalQuote = true
     remoteStore.fetchDaliyQuote { (quote, error) in
       guard let remoteQuote = quote else {
-        //error
         self.isUpdatingLocalQuote = false
-        completion(error)
+        completion(nil, error) //web related error
         return
       }
       
@@ -215,21 +215,20 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         lastupdate >= remoteQuote.date {
         //no need for update
         self.isUpdatingLocalQuote = false
-        completion(nil)
+        completion(nil, nil)
         return
       }
       
       self.localStore.insertDailyQuote(remoteQuote) { (error) in
         guard error == nil else {
-          //error
           self.isUpdatingLocalQuote = false
-          completion(error)
+          completion(nil, error) //local store related error
           return
         }
         
         //happy path
         self.isUpdatingLocalQuote = false
-        completion(nil)
+        completion(remoteQuote, nil)
         
       }
       
@@ -251,7 +250,7 @@ extension WeatherController {
     
     let displayedQuote = DisplayedQuote(id: quote.id,
                                         displayedDate: displayedDate,
-                                        author:quote.author,
+                                        author:quote.author ?? "",
                                         quote: quote.quote)
     
     return displayedQuote
@@ -293,9 +292,87 @@ extension WeatherController {
     
   }
   
-  //
+  func getWeatherQuoteViewModel(quote: Quote?,
+                                quoteError: PLErrorProtocol?,
+                                forecast: Forecast?,
+                                forecastError: PLErrorProtocol?) -> WeatherQuoteViewModel {
+    
+    if let quote = quote, let forecast = forecast {
+      let vm = getSuccessWeatherQuoteVM(quote: quote, forecast: forecast)
+      return vm
+      
+    } else if let quote = quote, let forecastError = forecastError {
+      let vm = getWeatherFailedWeatherQuoteVM(quote: quote, forecastError: forecastError)
+      return vm
+      
+    } else if let quoteError = quoteError, let forecast = forecast {
+      let vm = getQuoteFailedWeatherQuoteVM(quoteError: quoteError, forecast: forecast)
+      return vm
+      
+    } else if let quoteError = quoteError, let forecastError = forecastError {
+      let vm = getFailedWeatherQuoteVM(quoteError: quoteError, forecastError: forecastError)
+      return vm
+    
+    } else {
+      fatalError() //unexpect path
+    }
+    
+    
+    return WeatherQuoteViewModel()
+  }
+  
+  private func getSuccessWeatherQuoteVM(quote: Quote, forecast: Forecast) -> WeatherQuoteViewModel {
+    
+    let displayedQuote = getDisplayedQuote(from: quote)
+    let displayedForecast = getDisplayedForecast(from: forecast)
+    
+    let vm = WeatherQuoteViewModel(displayedQuote:displayedQuote,
+                                   displayedForecast: displayedForecast,
+                                   displayedError: nil)
+    return vm
+  }
+  
+  private func getFailedWeatherQuoteVM(quoteError: PLErrorProtocol,
+                                       forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
+    
+    //let forecastDebugInfo = "\(forecastError.domain):code\(forecastError.code)"
+    //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
+    
+    let displayedError = DisplayedError(title: "抓取資料錯誤", errorMessage: "無法抓取天氣預報和每日一句資料")
+    // TODO:// displayedQuote, displayedForecast 不該回傳nil, 應該回傳 UI 上的 edge case
+    let vm = WeatherQuoteViewModel(displayedQuote: nil, displayedForecast: nil, displayedError: displayedError)
+    
+    return vm
+    
+  }
+  
+  private func getQuoteFailedWeatherQuoteVM(quoteError: PLErrorProtocol,
+                                            forecast: Forecast) -> WeatherQuoteViewModel {
+    let displayedError = DisplayedError(title: "無法抓取每日一句", errorMessage: quoteError.localizedDescription)
+    let displayedForecast = getDisplayedForecast(from: forecast)
+    // TODO:// displayedQuote 不該回傳nil, 應該回傳 UI 上的 edge case
+    let vm = WeatherQuoteViewModel(displayedQuote: nil,
+                                   displayedForecast: displayedForecast,
+                                   displayedError: displayedError)
+    
+    return vm
+  }
+  
+  private func getWeatherFailedWeatherQuoteVM(quote: Quote,
+                                      forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
+    let displayedQuote = getDisplayedQuote(from: quote)
+    let displayedError = DisplayedError(title: "無法抓取氣象資料", errorMessage: forecastError.localizedDescription)
+    // TODO:// displayedForecast 不該回傳nil, 應該回傳 UI 上的 edge case
+    let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
+                                   displayedForecast: nil,
+                                   displayedError: displayedError)
+    
+    return vm
+  }
+  
   
 }
+
 
 //MARK: - dependency injection
 struct WatherControllerInjectionWrapper {
@@ -320,5 +397,6 @@ extension WeatherController: Injectable {
     }
     
   }
-
 }
+
+

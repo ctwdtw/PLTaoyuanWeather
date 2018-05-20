@@ -81,13 +81,13 @@ extension NetworkError {
   var localizedDescription: String {
     switch self {
     case .couldNotConnectToInternet:
-      return "無法連接至Internet，請檢查是否有開啟行動數據或wifi"
+      return "無法連接至Internet，請檢查是否有開啟行動數據或wifi。"
     case .cannotConnectToHost:
-      return "無法與伺服器連線。"
+      return "無法與伺服器連線，請洽客服。"
     case .requestTimedOut:
-      return "連線逾時，"
+      return "連線逾時，請稍後再試。"
     case .invalidStatusCode(let code):
-      return "不正確的 statusCode: \(code)"
+      return "不正確的 statusCode: \(code)，請洽客服。"
     case .uninterpreatedError(let error):
       return error.localizedDescription
     }

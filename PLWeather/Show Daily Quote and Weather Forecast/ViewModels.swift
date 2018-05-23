@@ -33,7 +33,7 @@ struct DisplayedWeather {
 
 struct DisplayedForecast {
   let displayedDate: String
-  let displayedWeathers: [DisplayedWeather]
+  var displayedWeathers: [DisplayedWeather]
   static func empty() -> DisplayedForecast {
     return DisplayedForecast(displayedDate: "", displayedWeathers: [])
   }

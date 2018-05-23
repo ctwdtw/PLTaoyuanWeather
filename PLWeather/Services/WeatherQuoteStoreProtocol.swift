@@ -22,7 +22,8 @@ struct LastupdateTime: Codable {
 //protocol for local store
 protocol WeatherQuoteLocalStoreProtocol: WeatherQuoteStoreProtocol {
   var lastupdateDate: LastupdateTime { get }
-  func insertDailyQuote(_ quote: Quote, completion: @escaping (PLErrorProtocol?) -> Void )
-  func insertForecast(_ forecast: Forecast, completion: @escaping (PLErrorProtocol?) -> Void )
-  //func deleteWeather(`for` ids: [String], completion: @escaping (Error) -> Void )
+  func insertDailyQuote(_ quote: Quote, completion: @escaping (_ insertedQuote: Quote?, PLErrorProtocol?) -> Void )
+  func insertForecast(_ forecast: Forecast, completion: @escaping (_ insertedForecast: Forecast? ,PLErrorProtocol?) -> Void )
+  func deleteWeather(at index: Int, of forecast: Forecast,
+                     completion: @escaping (_ updatedForecast: Forecast?, PLErrorProtocol?) -> Void)
 }

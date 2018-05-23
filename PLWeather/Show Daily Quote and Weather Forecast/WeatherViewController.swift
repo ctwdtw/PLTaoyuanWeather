@@ -109,7 +109,18 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
-      //TODO: //delete model
+      //TODO: - delete model
+      weatherController.deleteWeather(at: indexPath) { (displayedForecast, displayedError) in
+        guard displayedError == nil else {
+          print(displayedError!)
+          return
+        }
+        
+        self.displayedForecast = displayedForecast
+        //delete UI
+        tableView.deleteRows(at: [indexPath], with: .fade)
+      }
+      
     }
   }
 }

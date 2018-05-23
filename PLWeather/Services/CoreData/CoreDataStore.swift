@@ -82,8 +82,6 @@ extension CoreDataStore {
     }
   }
   
-  
-  
 }
 
 extension CoreDataStore {
@@ -96,6 +94,41 @@ extension CoreDataStore {
 }
 
 extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
+  func deleteWeather(at index: Int, of forecast: Forecast,
+                     completion: @escaping (_ updatedForecast: Forecast?, PLErrorProtocol?) -> Void) {
+    let lastupdate = forecast.lastupdate as NSDate
+    persistentContainer.performBackgroundTask { (context) in
+      let request = ManagedForecast.defaultSortedFetchRequest
+      request.predicate = NSPredicate(format: "lastupdate == %@", lastupdate)
+      do {
+        if let forecast = try context.fetch(request).first {
+          let weatherForDelete = forecast.managedWeathers[index]
+          context.delete(weatherForDelete)
+          try context.save()
+          let updatedForecast = forecast.toForecast()
+          
+          DispatchQueue.main.async {
+            completion(updatedForecast, nil)
+          }
+          
+        }
+        
+      } catch {
+        
+        DispatchQueue.main.async {
+          completion(nil, CoreDataError.cannotDelete(error))
+        }
+        
+        
+        
+      }
+      
+    }
+    
+    
+  }
+  
+  
   func fetchForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     persistentContainer.performBackgroundTask { (context) in
       let request = ManagedForecast.defaultSortedFetchRequest
@@ -126,7 +159,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
     
   }
   
-  func insertForecast(_ forecast: Forecast, completion: @escaping (PLErrorProtocol?) -> Void ) {
+  func insertForecast(_ forecast: Forecast, completion: @escaping (_ insertedForecast: Forecast?, PLErrorProtocol?) -> Void ) {
     persistentContainer.performBackgroundTask { (context) in
       let managedForecast = ManagedForecast(context: context)
       managedForecast.fromForecast(forecast)
@@ -139,16 +172,19 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
         return managedWeather
       }
       
+      
+      
       do {
         try context.save()
         self.lastupdateDate.forForecast = forecast.lastupdate
         DispatchQueue.main.async {
-          completion(nil)
+          //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
+          completion(forecast, nil)
         }
         
       } catch {
         DispatchQueue.main.async {
-          completion(CoreDataError.cannotInsert(error))
+          completion(nil, CoreDataError.cannotInsert(error))
         }
         
       }
@@ -191,7 +227,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
     }
   }
   
-  func insertDailyQuote(_ quote: Quote, completion: @escaping (PLErrorProtocol?) -> Void ) {
+  func insertDailyQuote(_ quote: Quote, completion: @escaping (_ insertedQuote: Quote? ,PLErrorProtocol?) -> Void ) {
     persistentContainer.performBackgroundTask { (context) in
       let managedQuote = ManagedQuote(context: context)
       managedQuote.fromQuote(quote: quote)
@@ -200,12 +236,13 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
         try context.save()
         self.lastupdateDate.forQuote = quote.date
         DispatchQueue.main.async {
-          completion(nil)
+          //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
+          completion(quote , nil)
         }
         
       } catch {
         DispatchQueue.main.async {
-          completion(CoreDataError.cannotInsert(error))
+          completion(nil, CoreDataError.cannotInsert(error))
         }
         
       }

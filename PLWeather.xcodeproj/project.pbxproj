@@ -250,8 +250,8 @@
 		63D0C417209499BE00FA087B /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
-				637D7305208F234500449D2D /* CoreDataModels */,
 				63C55E3720873B470075AACB /* CoreDataStore.swift */,
+				637D7305208F234500449D2D /* CoreDataModels */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";

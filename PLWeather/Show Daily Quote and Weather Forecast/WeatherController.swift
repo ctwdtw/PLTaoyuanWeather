@@ -14,6 +14,8 @@ import Foundation
 protocol WeatherQuoteControllerProtocol {
   //var localStore: WeatherQuoteLocalStoreProtocol { get }
   //var remoteStore: WeatherQuoteStoreProtocol { get }
+  var forecast: Forecast? { get }
+  var quote: Quote? { get }
 }
 
 //this is a mediator, it mediate dataformate between view (IndexPath for example) and model (id for example)...
@@ -23,10 +25,14 @@ protocol WeatherQuoteControllerProtocol {
 class WeatherController {
   private var localStore: WeatherQuoteLocalStoreProtocol = CoreDataStore()
   private var remoteStore: WeatherQuoteStoreProtocol = APIDataStore()
+  var forecast: Forecast?
+  var quote: Quote?
+
   private let presenter = WeatherQuotePresenter()
   private var isUpdatingLocalQuote = false
   private var isUpdatingLocalForecast = false
   private var isUpdatingLocaldata: Bool {
+  
     
     if isUpdatingLocalQuote == false && isUpdatingLocalForecast == false {
       return false
@@ -51,6 +57,27 @@ class WeatherController {
 //  1. 由 remote 端抓取資料，若比資料目前的新，就更新資料並展示，否則return掉。
 
 extension WeatherController: WeatherQuoteControllerProtocol {
+  
+  func deleteWeather(at indexPath: IndexPath, completion: @escaping (_ updatedForecast: DisplayedForecast?, DisplayedError?) -> Void) {
+    guard let forecast = forecast else {
+      fatalError()
+    }
+    
+    localStore.deleteWeather(at: indexPath.row, of: forecast) { (updatedForecast, error) in
+      self.forecast = updatedForecast
+      
+      guard let updatedForecast = updatedForecast else {
+        //TODO:// displayed error
+        return
+      }
+      
+      let displayedForecast = self.presenter.getDisplayedForecast(from: updatedForecast)
+      completion(displayedForecast, nil)
+      
+    }
+    
+  }
+  
   func fetchDataOnLoad(completion: @escaping (WeatherQuoteViewModel) -> Void) {
     fetchLocalQuoteAndForecast { (vm) in
       completion(vm)
@@ -78,7 +105,8 @@ extension WeatherController: WeatherQuoteControllerProtocol {
       
       self.localStore.fetchForecast { (forecast, forecastError) in
         
-        
+        self.quote = quote
+        self.forecast = forecast
         let vm = self.presenter.getWeatherQuoteViewModel(quote: quote,
                                                          quoteError: quoteError,
                                                          forecast: forecast,
@@ -140,20 +168,23 @@ extension WeatherController: WeatherQuoteControllerProtocol {
       
       if let lastupdate = self.localStore.lastupdateDate.forForecast,
         lastupdate == remoteForecast.lastupdate {
+        //no need to update
         self.isUpdatingLocalForecast = false
         completion(nil, APIError.noNeedToUpdateForecast)
         return
       }
       
-      self.localStore.insertForecast(remoteForecast) { (error) in
+      self.localStore.insertForecast(remoteForecast) { (insteredForecast, error) in
         guard error == nil else {
           self.isUpdatingLocalForecast = false
-          completion(nil, error) //local data store related error
+          self.forecast = insteredForecast
+          completion(insteredForecast, error) //local data store related error
           return
         }
         
         //happy path
         self.isUpdatingLocalForecast = false
+        self.forecast = insteredForecast
         completion(remoteForecast, nil)
         
       }
@@ -178,7 +209,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         return
       }
       
-      self.localStore.insertDailyQuote(remoteQuote) { (error) in
+      self.localStore.insertDailyQuote(remoteQuote) { (insertedQuote, error) in
         guard error == nil else {
           self.isUpdatingLocalQuote = false
           completion(nil, error) //local store related error
@@ -187,6 +218,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         
         //happy path
         self.isUpdatingLocalQuote = false
+        self.quote = insertedQuote
         completion(remoteQuote, nil)
         
       }

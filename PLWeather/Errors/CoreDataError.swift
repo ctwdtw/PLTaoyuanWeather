@@ -10,6 +10,7 @@ import Foundation
 enum CoreDataError: PLErrorProtocol {
   case cannotFetch(Error)
   case cannotInsert(Error)
+  case cannotDelete(Error)
 }
 
 extension CoreDataError {
@@ -23,6 +24,9 @@ extension CoreDataError {
       return error.code
     
     case .cannotInsert(let error as NSError):
+      return error.code
+    
+    case .cannotDelete(let error as NSError):
       return error.code
     }
     
@@ -43,6 +47,8 @@ extension CoreDataError {
     case .cannotFetch(let error as NSError):
       return error.localizedDescription
     case .cannotInsert(let error as NSError):
+      return error.localizedDescription
+    case .cannotDelete(let error as NSError):
       return error.localizedDescription
     }
   }

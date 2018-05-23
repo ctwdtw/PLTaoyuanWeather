@@ -62,7 +62,7 @@ class WeatherQuotePresenter {
     
   }
   
-  private func getDisplayedForecast(from forecast: Forecast) -> DisplayedForecast {
+  func getDisplayedForecast(from forecast: Forecast) -> DisplayedForecast {
     let calendar = Calendar(identifier: .hebrew)
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "zh_TW")

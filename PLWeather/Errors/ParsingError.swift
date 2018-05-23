@@ -13,8 +13,6 @@ enum ParsingError: Int, PLErrorProtocol {
   case cannotParseHtml = -10001
   case dailyQuoteHtmlHasNoBody = -1003
   case dailyQuoteHtmlHasNoArticle = -1005
-  //case dailyQuoteSuspend = -1006
-  //weather
   case cannotParseXML = -1002
   case forecastHasNoLastupadate = -1004
   case forecastDoesNotContainWeathers = 1006
@@ -47,8 +45,6 @@ extension ParsingError {
       return "無法解析每日一句資料。"
     case .cannotParseXML, .forecastHasNoLastupadate, .forecastDoesNotContainWeathers:
       return "無法解析天氣資料。"
-//    case .dailyQuoteSuspend:
-//      return "每日一句今日休刊"
     }
   }
 }

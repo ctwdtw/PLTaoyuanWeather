@@ -15,9 +15,10 @@ target 'PLWeather' do
   #pod 'PLStrechyViewController', :git => 'https://github.com/ctwdtw/PLStrechyViewController.git'
   #pod 'PLPageMenuViewController', :git =>'https://github.com/ctwdtw/PLPageMenuViewController.git'
   
+  
   #syntax sugar
-  pod 'Reusable', :git =>'https://github.com/ctwdtw/Reusable.git', :commit => 'c271af2'
-  # pod 'R.swift'
+  #pod 'Reusable', :git =>'https://github.com/ctwdtw/Reusable.git', :commit => 'c271af2'
+  pod 'R.swift'
 
 
   #web scraping

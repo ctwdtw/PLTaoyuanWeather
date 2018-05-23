@@ -8,6 +8,62 @@
 
 import Foundation
 
+struct Quote {
+  let id: String
+  let date: Date!
+  let author: String!
+  let quote: String
+  public enum SpecialCases {
+    case suspen
+  }
+  
+  static func suspen(with dailyQuoteDatetimeString: String) -> Quote {
+    return Quote(id: Quote.SpecialCases.suspen.id,
+                 date: Date.quoteDate(from: dailyQuoteDatetimeString),
+                 author: Quote.SpecialCases.suspen.author,
+                 quote: Quote.SpecialCases.suspen.quote)
+  }
+}
+
+//MARK: - special case property values
+extension Quote.SpecialCases {
+  var id: String {
+    switch self {
+    case .suspen:
+      return "suspen"
+    }
+  }
+  
+  var author: String!{
+    switch self {
+    case .suspen:
+      return nil
+    }
+  }
+  
+  var quote: String {
+    switch self {
+    case .suspen:
+      return "每日一句停刊一天"
+    }
+  }
+  
+}
+
+struct Forecast {
+  let lastupdate: Date
+  let weathers: [Weather]
+}
+
+struct Weather {
+  let date: Date
+  let weekDay: WeekDay
+  let dayOrNight: DayOrNight
+  let highestTemprature: Int
+  let lowestTemprature: Int
+  let iconDescription: WeatherDescription
+}
+
 enum WeekDay: Int {
   case sun = 1
   case mon
@@ -21,7 +77,7 @@ enum WeekDay: Int {
     switch weekDay {
     case 1: self = .sun
     case 2: self = .mon
-    case 3: self = .thu
+    case 3: self = .tue
     case 4: self = .wed
     case 5: self = .thu
     case 6: self = .fri
@@ -139,7 +195,6 @@ extension WeatherDescription {
   }
 }
 
-
 enum DayOrNight: Int {
   case day = 0
   case night
@@ -162,86 +217,3 @@ extension DayOrNight {
     }
   }
 }
-
-
-struct Weather {
-  let date: Date
-  let weekDay: WeekDay
-  let dayOrNight: DayOrNight
-  let highestTemprature: Int
-  let lowestTemprature: Int
-  let iconDescription: WeatherDescription
-}
-
-struct Forecast {
-  let lastupdate: Date
-  let weathers: [Weather]
-}
-
-struct Quote {
-  let id: String
-  let date: Date!
-  let author: String!
-  let quote: String
-  public enum SpecialCases {
-    case empty
-    case suspen
-  }
-
-  static func empty() -> Quote {
-    return Quote(id: Quote.SpecialCases.empty.id,
-                 date: Quote.SpecialCases.empty.date,
-                 author: Quote.SpecialCases.empty.author,
-                 quote: Quote.SpecialCases.empty.quote)
-  }
-  static func suspen() -> Quote {
-    return Quote(id: Quote.SpecialCases.suspen.id,
-                 date: Quote.SpecialCases.suspen.date,
-                 author: Quote.SpecialCases.suspen.author,
-                 quote: Quote.SpecialCases.suspen.quote)
-  }
-}
-
-//MARK: - special case property values
-extension Quote.SpecialCases {
-  var id: String {
-    switch self {
-    case .empty:
-      return "empty"
-    case .suspen:
-      return "suspen"
-    }
-  }
-
-  var date: Date! {
-    switch self {
-    case .empty:
-      return nil
-    case .suspen:
-      return Date()
-    }
-  }
-
-  var author: String!{
-    switch self {
-    case .empty:
-      return nil
-    case .suspen:
-      return nil
-    }
-  }
-
-  var quote: String {
-    switch self {
-    case .empty:
-      return "尚無資料"
-    case .suspen:
-      return "每日一句停刊一天"
-    }
-  }
-
-}
-
-
-
-

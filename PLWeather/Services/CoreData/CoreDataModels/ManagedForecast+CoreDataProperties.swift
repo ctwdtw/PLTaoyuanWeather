@@ -18,7 +18,9 @@ extension ManagedForecast {
 
 extension ManagedForecast {
   var managedWeathers: [ManagedWeather] {
-    return managedWeather.allObjects as! [ManagedWeather]
+    let managedWeathers = managedWeather.sortedArray(using: ManagedWeather.defaultSortDescriptor)
+                          as! [ManagedWeather]
+    return managedWeathers
   }
 }
 

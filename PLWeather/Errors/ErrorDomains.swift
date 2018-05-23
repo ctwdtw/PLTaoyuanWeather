@@ -10,5 +10,7 @@ import Foundation
 struct PLErrorDomain {
   static let coreData = "CoreDataError"
   static let apiStore = "APIError"
+  static let network = "NetworkError"
   static let xmlParser = "ParsingError"
+  
 }

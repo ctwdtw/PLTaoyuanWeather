@@ -35,11 +35,23 @@ class CoreDataStore {
     })
     return container
   }()
-  private(set) var lastupdateDateForQuote: Date?
-  private(set) var lastupdateDateForForecast: Date?
+  
+  private(set) var lastupdateDate: LastupdateTime
   
   init() {
-    NotificationCenter.default.addObserver(self, selector: #selector(saveContext), name: .UIApplicationWillTerminate, object: nil)
+    
+    do {
+      self.lastupdateDate = try Storage.retrieve("lastupdate", from: Storage.Directory.documents, as: LastupdateTime.self)
+    } catch {
+      self.lastupdateDate = LastupdateTime(forQuote: nil, forForecast: nil)
+    }
+    
+    NotificationCenter.default.addObserver(self, selector: #selector(saveData),
+                                           name: .UIApplicationWillResignActive,
+                                           object: nil)
+    NotificationCenter.default.addObserver(self, selector: #selector(saveData),
+                                           name: .UIApplicationWillTerminate,
+                                           object: nil)
   }
   
   deinit {
@@ -49,7 +61,16 @@ class CoreDataStore {
 }
 
 extension CoreDataStore {
-  @objc func saveContext () {
+  @objc func saveData() {
+    saveContext()
+    saveStorage()
+  }
+  
+  private func saveStorage() {
+    Storage.store(lastupdateDate, to: .documents, as: "lastupdate")
+  }
+  
+  private func saveContext()  {
     let context = persistentContainer.viewContext
     if context.hasChanges {
       do {
@@ -60,12 +81,15 @@ extension CoreDataStore {
       }
     }
   }
+  
+  
+  
 }
 
 extension CoreDataStore {
   func cleanCoreDataStore() {
     persistentContainer.viewContext.perform {
-      
+      //TODO;// delete all
       
     }
   }
@@ -80,14 +104,22 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
         
         if let managedForecast = try context.fetch(request).first {
           let forecast = managedForecast.toForecast()
-          completion(forecast, nil)
+          DispatchQueue.main.async {
+            completion(forecast, nil)
+          }
+          
         } else {
-          //completion(nil, CoreDataError.emptyFetch)
-          completion(nil, nil)
+          DispatchQueue.main.async {
+            completion(nil, nil)
+          }
+          
         }
         
       } catch {
-        completion(nil, CoreDataError.error(from: error))
+        DispatchQueue.main.async {
+          completion(nil, CoreDataError.cannotFetch(error))
+        }
+        
       }
       
     }
@@ -109,10 +141,16 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       
       do {
         try context.save()
-        self.lastupdateDateForForecast = forecast.lastupdate
-        completion(nil)
+        self.lastupdateDate.forForecast = forecast.lastupdate
+        DispatchQueue.main.async {
+          completion(nil)
+        }
+        
       } catch {
-        completion(CoreDataError.error(from: error))
+        DispatchQueue.main.async {
+          completion(CoreDataError.cannotInsert(error))
+        }
+        
       }
       
     }
@@ -126,21 +164,30 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       
       do {
         
+        let resultSet = try context.fetch(request)
+        print(resultSet.count)
+        
         if let managedQuote = try context.fetch(request).first {
           let quote = managedQuote.toQuote()
-          completion(quote, nil)
+          DispatchQueue.main.async {
+            completion(quote, nil)
+          }
+          
         } else {
-          //completion(nil, CoreDataError.emptyFetch)
-          completion(nil, nil)
+          DispatchQueue.main.async {
+            completion(nil, nil)
+          }
+          
         }
         
         try context.save() // propagate managedObject to view context
         
       } catch {
-        completion(nil, CoreDataError.error(from: error))
+        DispatchQueue.main.async {
+          completion(nil, CoreDataError.cannotFetch(error))
+        }
         
       }
-      
     }
   }
   
@@ -151,10 +198,16 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       
       do {
         try context.save()
-        self.lastupdateDateForQuote = quote.date
-        completion(nil)
+        self.lastupdateDate.forQuote = quote.date
+        DispatchQueue.main.async {
+          completion(nil)
+        }
+        
       } catch {
-        completion(CoreDataError.error(from: error))
+        DispatchQueue.main.async {
+          completion(CoreDataError.cannotInsert(error))
+        }
+        
       }
       
     }

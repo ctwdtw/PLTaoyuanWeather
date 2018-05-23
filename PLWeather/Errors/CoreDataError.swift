@@ -8,8 +8,8 @@
 
 import Foundation
 enum CoreDataError: PLErrorProtocol {
-  //case emptyFetch
-  case uninterpretedError(Error)
+  case cannotFetch(Error)
+  case cannotInsert(Error)
 }
 
 extension CoreDataError {
@@ -19,12 +19,13 @@ extension CoreDataError {
 extension CoreDataError {
   var code: Int {
     switch self {
-//    case .emptyFetch:
-//      return  -10002
-    case .uninterpretedError(let error as NSError):
+    case .cannotFetch(let error as NSError):
       return error.code
-      
+    
+    case .cannotInsert(let error as NSError):
+      return error.code
     }
+    
   }
 }
 
@@ -35,23 +36,14 @@ extension CoreDataError {
   }
 }
 
-
-extension CoreDataError {
-  static func error(from nsCoreDataError: Error) -> PLErrorProtocol {
-    return CoreDataError.uninterpretedError(nsCoreDataError)
-  }
-}
-
-
 //TODO : - multi language
 extension CoreDataError {
   var localizedDescription: String {
     switch self {
-//    case .emptyFetch:
-//      return  "沒有資料"
-    case .uninterpretedError(let error as NSError):
+    case .cannotFetch(let error as NSError):
       return error.localizedDescription
-      
+    case .cannotInsert(let error as NSError):
+      return error.localizedDescription
     }
   }
 }

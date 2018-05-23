@@ -15,11 +15,13 @@ extension Date {
     guard self.day() == date.day() else { return false }
     return true
   }
+  
   func equalToMonth(with date: Date) -> Bool {
     guard self.year() == date.year() else { return false }
     guard self.month() == date.month() else { return false }
     return true
   }
+  
   func equalToYear(with date: Date) -> Bool {
     guard self.year() == date.year() else { return false }
     return true
@@ -31,14 +33,17 @@ extension Date {
     let day = NSCalendar(calendarIdentifier: .gregorian)!.component(.day, from: self)
     return day
   }
+  
   func month() -> Int {
     let month = NSCalendar(calendarIdentifier: .gregorian)!.component(.month, from: self)
     return month
   }
+  
   func year() -> Int {
     let year = NSCalendar(calendarIdentifier: .gregorian)!.component(.year, from: self)
     return year
   }
+  
   func weekDay() -> Int {
     let weekDay = NSCalendar(calendarIdentifier: .gregorian)!.component(.weekday, from: self)
     return weekDay

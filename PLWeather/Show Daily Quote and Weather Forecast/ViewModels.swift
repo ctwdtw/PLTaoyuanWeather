@@ -10,18 +10,21 @@ import Foundation
 struct DisplayedWeather {
   let displayedDate: String
   let displayedWeekDay: String
+  let displayedDayOrNight: String
   let displayedHighestTemprature: String
   let displayedLowetstTemprature: String
   let displayedIconDescription: String
   
   init(_ displayedDate: String,
          weekDay: String,
+         dayOrNight: String,
          hightestTemprature: String,
          lowestTemprature: String,
          iconDescription: String) {
     
     self.displayedDate = displayedDate
     self.displayedWeekDay = weekDay
+    self.displayedDayOrNight = dayOrNight
     self.displayedHighestTemprature = hightestTemprature
     self.displayedLowetstTemprature = lowestTemprature
     self.displayedIconDescription = iconDescription
@@ -37,6 +40,7 @@ struct DisplayedForecast {
 }
 
 struct DisplayedError {
+  let shouldShow: Bool //show the error by UI or just print it in console
   let title: String
   let errorMessage: String
 }
@@ -47,7 +51,7 @@ struct DisplayedQuote {
   let author: String
   let quote: String
   static func empty() -> DisplayedQuote {
-    return DisplayedQuote(id: "", displayedDate: "", author: "", quote: "")
+    return DisplayedQuote(id: "", displayedDate: "暫無資料", author: "暫無資料", quote: "暫無資料")
   }
 }
 

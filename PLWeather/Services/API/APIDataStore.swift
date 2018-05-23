@@ -60,7 +60,7 @@ extension APIDataStore: WeatherQuoteStoreProtocol {
 //network private
 extension APIDataStore {
   private func fetchDailyQuoteHtmlStringByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
-    Alamofire.request(dailyQuoteUrlString).validate().responseString(queue: DispatchQueue.global()) { (response) in
+    Alamofire.request(dailyQuoteUrlString).validate().responseString { (response) in
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
@@ -72,7 +72,7 @@ extension APIDataStore {
   }
   
   private func fetchforecastXMLByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
-    Alamofire.request(weatherUrlString).validate().responseString(queue: DispatchQueue.global(), encoding: .utf8) { (response) in
+    Alamofire.request(weatherUrlString).validate().responseString(encoding: .utf8) { (response) in
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
@@ -105,13 +105,22 @@ extension APIDataStore {
       throw ParsingError.dailyQuoteHtmlHasNoBody
     }
     
+    guard let dateTimeText = try doc.getElementsByClass("fillup").first()?.select("a")
+                                    .array()[1].attr("href").components(separatedBy: "/")
+                                    .last else {
+      throw ParsingError.dailyQuoteHtmlHasNoArticle
+    
+    }
+    
+    
     guard let article = try body.getElementsByClass(ParsingConst.article).first() else {
       throw ParsingError.dailyQuoteHtmlHasNoArticle
+    
     }
     
     guard let datetime = try article.select(ParsingConst.datetime).first() else {
-      return Quote.suspen()
-      //throw ParsingError.dailyQuoteSuspend
+      return Quote.suspen(with: dateTimeText)
+      
     }
     
     guard let author = try article.select(ParsingConst.author).first() else {
@@ -123,7 +132,7 @@ extension APIDataStore {
     }
     
     //id
-    let dateTimeText = try datetime.text()
+    //dateTimeText
     
     //date
     let date = Date.quoteDate(from: dateTimeText)

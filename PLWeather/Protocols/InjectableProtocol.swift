@@ -11,3 +11,4 @@ protocol Injectable {
   associatedtype T
   func inject(_ injected: T)
 }
+

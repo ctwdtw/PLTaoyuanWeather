@@ -8,19 +8,11 @@
 
 import Foundation
 
-
-
 //實作在Controller上, 由 VC 呼叫
 protocol WeatherQuoteControllerProtocol {
-  //var localStore: WeatherQuoteLocalStoreProtocol { get }
-  //var remoteStore: WeatherQuoteStoreProtocol { get }
   var forecast: Forecast? { get }
   var quote: Quote? { get }
 }
-
-//this is a mediator, it mediate dataformate between view (IndexPath for example) and model (id for example)...
-//例如從 tableview(viewController) fire 一個刪除 row 的 message, 這層 controller 吃到 NSIndexPath 後會把轉換成 id 給下一層的
-//localDataManager 去真的執行刪除動作, 然後才把reload 的指令包成 IndexPath 給tableView(ViewController) 讓他去 reload Data.....
 
 class WeatherController {
   private var localStore: WeatherQuoteLocalStoreProtocol = CoreDataStore()
@@ -33,7 +25,6 @@ class WeatherController {
   private var isUpdatingLocalForecast = false
   private var isUpdatingLocaldata: Bool {
   
-    
     if isUpdatingLocalQuote == false && isUpdatingLocalForecast == false {
       return false
     } else {
@@ -128,6 +119,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   
   private func updateLocalData(completion: @escaping (Quote?, PLErrorProtocol?, Forecast?, PLErrorProtocol?) -> Void) {
     guard isUpdatingLocaldata == false else {
+      print("cancle update this time")
       return //cancel upate for this time
     }
     
@@ -175,19 +167,10 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         return
       }
       
-      if let lastupdate = self.localStore.lastupdateDate.forForecast,
-        lastupdate == remoteForecast.lastupdate {
-        //no need to update
-        self.isUpdatingLocalForecast = false
-        completion(nil, APIError.noNeedToUpdateForecast)
-        return
-      }
-      
       self.localStore.insertForecast(remoteForecast) { (insteredForecast, error) in
         guard error == nil else {
           self.isUpdatingLocalForecast = false
-          self.forecast = insteredForecast
-          completion(insteredForecast, error) //local data store related error
+          completion(nil, error) //local data store related error
           return
         }
         
@@ -207,14 +190,6 @@ extension WeatherController: WeatherQuoteControllerProtocol {
       guard let remoteQuote = quote else {
         self.isUpdatingLocalQuote = false
         completion(nil, error) //web related error
-        return
-      }
-      
-      if let lastupdate = self.localStore.lastupdateDate.forQuote,
-        lastupdate == remoteQuote.date {
-        //no need for update
-        self.isUpdatingLocalQuote = false
-        completion(nil, APIError.noNeedToUpdateQuote)
         return
       }
       

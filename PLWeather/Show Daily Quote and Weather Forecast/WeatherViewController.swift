@@ -93,7 +93,7 @@ class WeatherViewController: UIViewController {
     forecastTableView.reloadData()
   }
   
-  @objc func refreshData() {
+  @objc @IBAction func refreshData() {
     weatherController.pullToRefreshData { [unowned self] (weatherQuoteVM) in
       self.forecastTableView.refreshControl?.endRefreshing()
       

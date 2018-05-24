@@ -159,7 +159,21 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
     
   }
   
+  private func shouldUpdateForecast(_ forecast: Forecast) -> Bool {
+    if let lastupdate = self.lastupdateDate.forForecast,
+      lastupdate == forecast.lastupdate {
+      return false
+    } else {
+      return true
+    }
+  }
+  
   func insertForecast(_ forecast: Forecast, completion: @escaping (_ insertedForecast: Forecast?, PLErrorProtocol?) -> Void ) {
+    guard shouldUpdateForecast(forecast) else {
+      completion(nil, CoreDataError.noNeedToUpdateForecast)
+      return
+    }
+    
     persistentContainer.performBackgroundTask { (context) in
       let managedForecast = ManagedForecast(context: context)
       managedForecast.fromForecast(forecast)
@@ -227,7 +241,21 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
     }
   }
   
+  private func shouldUpdateDailyQuote(_ quote: Quote) -> Bool {
+    if let lasupdate = lastupdateDate.forQuote,
+      lasupdate == quote.date {
+      return false
+    } else {
+      return true
+    }
+  }
+  
   func insertDailyQuote(_ quote: Quote, completion: @escaping (_ insertedQuote: Quote? ,PLErrorProtocol?) -> Void ) {
+    guard shouldUpdateDailyQuote(quote) else {
+      completion(nil, CoreDataError.noNeedToUpdateQuote)
+      return
+    }
+  
     persistentContainer.performBackgroundTask { (context) in
       let managedQuote = ManagedQuote(context: context)
       managedQuote.fromQuote(quote: quote)

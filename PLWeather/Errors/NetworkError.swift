@@ -8,6 +8,7 @@
 
 import Foundation
 import Alamofire
+
 enum NetworkError: PLErrorProtocol {
   case couldNotConnectToInternet
   case cannotConnectToHost

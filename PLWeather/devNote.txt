@@ -16,8 +16,13 @@ tableView reload vs tableView reload at indexPaths 差異在哪？
 4/28
 基礎建設架設好, 基本功能完成, 待處理：
 0. git
-1. error display (the only handling here)
-2. 找尋適當位置, 把background 執行的 function dispatch 回 main queue <--- 由 UI ViewController 自行 dispatch....
+1. error handling
+   :onevcat 的文章中提到 excpetion 和 error 的差異, 在 Apple 的架構中,
+    exception 是在 dev 的階段就要處理的問題，否則在 run time 會 crash 掉
+    error 是在 run time 階段, user 走非 happy path 以外的路徑產生的非致命
+    問題, 例如寫入檔案時，發現磁碟空間已滿。
+2. 找尋適當位置, 把background 執行的 function dispatch 回 main queue
+   :執行完之後，立即 dispatch 回 main, 才不會讓呼叫方產生困惑。
 3. 刪除功能
 4. UI
 5. Realm

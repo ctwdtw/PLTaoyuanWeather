@@ -113,6 +113,7 @@ class WeatherQuotePresenter {
     return vm
   }
   
+  //both forecast and quote contains error
   private func getFailedWeatherQuoteVM(oldQuote: Quote?,
                                        quoteError: PLErrorProtocol,
                                        oldForecast: Forecast?,
@@ -121,57 +122,104 @@ class WeatherQuotePresenter {
     //debug info for developer
     //let forecastDebugInfo = "\(forecastError.domain):code\(forecastError.code)"
     //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
-    
-    //TODO:// - fix hard code
-    
+        
     var shouldShow = true
-    var title = "抓取資料錯誤"
-    var errorMessage = "無法抓取天氣預報和每日一句資料"
+    var title = ""
+    var errorMessage = ""
     
-    if let quoteError = quoteError as? APIError, quoteError == .noNeedToUpdateQuote,
-      let forecastError = forecastError as? APIError, forecastError == .noNeedToUpdateForecast {
+    let matchError = (quoteError as? CoreDataError, forecastError as? CoreDataError)
+    switch matchError {
+    case (.some(.noNeedToUpdateQuote), .some(.noNeedToUpdateForecast)):
+      let error = CoreDataError.noNeedToUpdateData
       shouldShow = false
-      title = ""
-      errorMessage = "無需更新資料"
-    
-    } else if let quoteError = quoteError as? APIError, quoteError == .noNeedToUpdateQuote {
-      //quote 無需更新
-      title = "抓取氣象資料錯誤"
-      errorMessage = "無法抓取氣象資料"
-    
-    } else if let forecastError = forecastError as? APIError, forecastError == .noNeedToUpdateForecast {
-      //forecast 無需更新
-      title = "抓取每日一句資料錯誤"
-      errorMessage = "無法抓取每日一句資料"
-    
+      title = error.domain
+      errorMessage = error.localizedDescription
+      
+    case (.some(.noNeedToUpdateQuote), nil):
+      shouldShow = true
+      title = forecastError.domain
+      errorMessage = forecastError.localizedDescription
+      
+    case (nil, .some(.noNeedToUpdateForecast)):
+      
+      shouldShow = true
+      title = quoteError.domain
+      errorMessage = quoteError.localizedDescription
+      
+    case (nil, nil):
+      if let qe = quoteError as? NetworkError,
+        case NetworkError.couldNotConnectToInternet = qe,
+        let fe = forecastError as? NetworkError,
+        case NetworkError.couldNotConnectToInternet = fe {
+        
+        shouldShow = true
+        title = qe.domain
+        errorMessage = qe.localizedDescription
+        
+      } else {
+        print(quoteError)
+        print(forecastError)
+        
+      }
+      
+    default:
+      print(quoteError)
+      print(forecastError)
     }
     
     let displayedQuote: DisplayedQuote
     if let oldQuote = oldQuote {
       displayedQuote = getDisplayedQuote(from: oldQuote)
+      
     } else {
       displayedQuote = DisplayedQuote.empty()
+      
     }
     
     let displayedForecast : DisplayedForecast
     
     if let oldForecast = oldForecast {
       displayedForecast = getDisplayedForecast(from: oldForecast)
+      
     } else {
       displayedForecast = DisplayedForecast.empty()
+      
     }
     
-    let displayedError = DisplayedError(shouldShow: shouldShow, title: title, errorMessage: errorMessage)
+    let displayedError = DisplayedError(shouldShow: shouldShow,
+                                        title: title,
+                                        errorMessage: errorMessage)
+    
     let vm = WeatherQuoteViewModel(displayedQuote:  displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
     
   }
-  
+ 
+  // quote contains error
   private func getQuoteFailedWeatherQuoteVM(quoteError: PLErrorProtocol,
                                             forecast: Forecast) -> WeatherQuoteViewModel {
-    let displayedError = DisplayedError(shouldShow: true, title: "無法抓取每日一句", errorMessage: quoteError.localizedDescription)
+    var shouldShow = true
+    var title = ""
+    var errorMessage = ""
+    if let qe = quoteError as? CoreDataError,
+      case .noNeedToUpdateQuote = qe {
+      shouldShow = false
+      title = qe.domain
+      errorMessage = qe.localizedDescription
+    
+    } else {
+      shouldShow = true
+      title = "無法抓取每日一句"
+      errorMessage = quoteError.localizedDescription
+    
+    }
+    
+    let displayedError = DisplayedError(shouldShow: shouldShow,
+                                        title: title,
+                                        errorMessage: errorMessage)
+    
     let displayedForecast = getDisplayedForecast(from: forecast)
     let vm = WeatherQuoteViewModel(displayedQuote: DisplayedQuote.empty(),
                                    displayedForecast: displayedForecast,
@@ -179,16 +227,36 @@ class WeatherQuotePresenter {
     return vm
   }
   
+  //forecast contains error
   private func getWeatherFailedWeatherQuoteVM(quote: Quote,
                                               forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
+    var shouldShow = true
+    var title = ""
+    var errorMessage = ""
+    if let fe = forecastError as? CoreDataError,
+      case .noNeedToUpdateQuote = fe {
+      shouldShow = false
+      title = fe.domain
+      errorMessage = fe.localizedDescription
+      
+    } else {
+      shouldShow = true
+      title = "無法抓取氣象資料"
+      errorMessage = forecastError.localizedDescription
+      
+    }
+    
+    let displayedError = DisplayedError(shouldShow: shouldShow,
+                                        title: title,
+                                        errorMessage: errorMessage)
     let displayedQuote = getDisplayedQuote(from: quote)
-    let displayedError = DisplayedError(shouldShow: true, title: "無法抓取氣象資料", errorMessage: forecastError.localizedDescription)
     let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
                                    displayedForecast: DisplayedForecast.empty(),
                                    displayedError: displayedError)
     return vm
   }
   
+  //empty data
   private func getEmptyWeatherQuoteVM() -> WeatherQuoteViewModel {
     let displayedQuote = DisplayedQuote.empty()
     let displayedForecast = DisplayedForecast.empty()

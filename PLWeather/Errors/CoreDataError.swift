@@ -11,6 +11,9 @@ enum CoreDataError: PLErrorProtocol {
   case cannotFetch(Error)
   case cannotInsert(Error)
   case cannotDelete(Error)
+  case noNeedToUpdateForecast
+  case noNeedToUpdateQuote
+  case noNeedToUpdateData
 }
 
 extension CoreDataError {
@@ -22,12 +25,21 @@ extension CoreDataError {
     switch self {
     case .cannotFetch(let error as NSError):
       return error.code
-    
+      
     case .cannotInsert(let error as NSError):
       return error.code
-    
+
     case .cannotDelete(let error as NSError):
       return error.code
+    
+    case .noNeedToUpdateForecast:
+      return -1002
+    
+    case .noNeedToUpdateQuote:
+      return -1001
+    
+    case .noNeedToUpdateData:
+      return -1003
     }
     
   }
@@ -50,6 +62,12 @@ extension CoreDataError {
       return error.localizedDescription
     case .cannotDelete(let error as NSError):
       return error.localizedDescription
+    case .noNeedToUpdateForecast:
+      return "不需更新氣象資料"
+    case .noNeedToUpdateQuote:
+      return "不需更新每日一句"
+    case .noNeedToUpdateData:
+      return "不需更新資料"
     }
   }
 }

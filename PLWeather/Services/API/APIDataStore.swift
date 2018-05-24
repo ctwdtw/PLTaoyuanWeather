@@ -104,7 +104,7 @@ extension APIDataStore {
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
-        completion(nil, NetworkError.error(from: error)) //WHYYYYYYYY?
+        completion(nil, NetworkError.error(from: error))
       } else {
         assertionFailure("both value and error are nil")
       }

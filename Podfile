@@ -29,7 +29,7 @@ target 'PLWeather' do
   # networklayer
   pod 'Alamofire', :git=>'https://github.com/Alamofire/Alamofire.git', :commit => 'bc973c5'
   #pod 'Alamofire-SwiftyJSON', :git =>'https://github.com/SwiftyJSON/Alamofire-SwiftyJSON', :commit => 'b329aa2'
-  pod 'CodableAlamofire', :git => 'https://github.com/Otbivnoe/CodableAlamofire', :commit => 'dcbbb9e'
+  #pod 'CodableAlamofire', :git => 'https://github.com/Otbivnoe/CodableAlamofire', :commit => 'dcbbb9e'
   #pod 'Kingfisher'
   
   #persistencelayer

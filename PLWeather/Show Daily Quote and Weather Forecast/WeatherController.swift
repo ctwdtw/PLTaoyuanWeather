@@ -67,7 +67,11 @@ extension WeatherController: WeatherQuoteControllerProtocol {
       self.forecast = updatedForecast
       
       guard let updatedForecast = updatedForecast else {
-        //TODO:// displayed error
+        let displayedError = DisplayedError(shouldShow: true,
+                                            title: error!.domain,
+                                            errorMessage: error!.localizedDescription)
+        
+        completion(nil, displayedError)
         return
       }
       
@@ -88,10 +92,13 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   func pullToRefreshData(completion: @escaping (WeatherQuoteViewModel) -> Void) {
     updateLocalData { updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
       
-      let vm = self.presenter.getWeatherQuoteViewModel(quote: updatedQuote,
+      let vm = self.presenter.getWeatherQuoteViewModel(updatedQuote: updatedQuote,
+                                                       oldQuote: self.quote,
                                                        quoteError: quoteUpdatedError,
-                                                       forecast: updatedForecast,
+                                                       updatedForecast: updatedForecast,
+                                                       oldForecast: self.forecast,
                                                        forecastError: forecastUpdatedError)
+      
       completion(vm)
       
     }
@@ -107,9 +114,11 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         
         self.quote = quote
         self.forecast = forecast
-        let vm = self.presenter.getWeatherQuoteViewModel(quote: quote,
+        let vm = self.presenter.getWeatherQuoteViewModel(updatedQuote: quote,
+                                                         oldQuote: self.quote,
                                                          quoteError: quoteError,
-                                                         forecast: forecast,
+                                                         updatedForecast: forecast,
+                                                         oldForecast: self.forecast,
                                                          forecastError: forecastError)
         completion(vm)
         

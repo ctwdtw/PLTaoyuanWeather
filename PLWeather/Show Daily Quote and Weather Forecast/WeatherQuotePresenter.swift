@@ -10,28 +10,33 @@ import Foundation
 
 //Presentation logic such as formatting string/Date into string user will see.
 class WeatherQuotePresenter {
-  func getWeatherQuoteViewModel(quote: Quote?,
+  func getWeatherQuoteViewModel(updatedQuote: Quote?,
+                                oldQuote: Quote?,
                                 quoteError: PLErrorProtocol?,
-                                forecast: Forecast?,
+                                updatedForecast: Forecast?,
+                                oldForecast: Forecast?,
                                 forecastError: PLErrorProtocol?) -> WeatherQuoteViewModel {
     
-    if let quote = quote, let forecast = forecast {
+    if let quote = updatedQuote, let forecast = updatedForecast {
       let vm = getSuccessWeatherQuoteVM(quote: quote, forecast: forecast)
       return vm
       
-    } else if let quote = quote, let forecastError = forecastError {
+    } else if let quote = updatedQuote, let forecastError = forecastError {
       let vm = getWeatherFailedWeatherQuoteVM(quote: quote, forecastError: forecastError)
       return vm
       
-    } else if let quoteError = quoteError, let forecast = forecast {
+    } else if let quoteError = quoteError, let forecast = updatedForecast {
       let vm = getQuoteFailedWeatherQuoteVM(quoteError: quoteError, forecast: forecast)
       return vm
       
     } else if let quoteError = quoteError, let forecastError = forecastError {
-      let vm = getFailedWeatherQuoteVM(quoteError: quoteError, forecastError: forecastError)
+      let vm = getFailedWeatherQuoteVM(oldQuote: oldQuote,
+                                       quoteError: quoteError,
+                                       oldForecast: oldForecast,
+                                       forecastError: forecastError)
       return vm
       
-    } else if quote == nil, forecast == nil, quoteError == nil, forecastError == nil {
+    } else if updatedQuote == nil, updatedForecast == nil, quoteError == nil, forecastError == nil {
       let vm = getEmptyWeatherQuoteVM()
       return vm
       
@@ -40,7 +45,6 @@ class WeatherQuotePresenter {
       //unexpectPath
     }
     
-    return WeatherQuoteViewModel()
   }
   
   
@@ -109,13 +113,16 @@ class WeatherQuotePresenter {
     return vm
   }
   
-  private func getFailedWeatherQuoteVM(quoteError: PLErrorProtocol,
+  private func getFailedWeatherQuoteVM(oldQuote: Quote?,
+                                       quoteError: PLErrorProtocol,
+                                       oldForecast: Forecast?,
                                        forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
     
     //debug info for developer
     //let forecastDebugInfo = "\(forecastError.domain):code\(forecastError.code)"
     //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
     
+    //TODO:// - fix hard code
     
     var shouldShow = true
     var title = "抓取資料錯誤"
@@ -139,10 +146,24 @@ class WeatherQuotePresenter {
     
     }
     
+    let displayedQuote: DisplayedQuote
+    if let oldQuote = oldQuote {
+      displayedQuote = getDisplayedQuote(from: oldQuote)
+    } else {
+      displayedQuote = DisplayedQuote.empty()
+    }
+    
+    let displayedForecast : DisplayedForecast
+    
+    if let oldForecast = oldForecast {
+      displayedForecast = getDisplayedForecast(from: oldForecast)
+    } else {
+      displayedForecast = DisplayedForecast.empty()
+    }
     
     let displayedError = DisplayedError(shouldShow: shouldShow, title: title, errorMessage: errorMessage)
-    let vm = WeatherQuoteViewModel(displayedQuote: DisplayedQuote.empty(),
-                                   displayedForecast: DisplayedForecast.empty(),
+    let vm = WeatherQuoteViewModel(displayedQuote:  displayedQuote,
+                                   displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
     

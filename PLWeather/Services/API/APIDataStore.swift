@@ -13,15 +13,40 @@ import SwiftSoup
 class APIDataStore {
   private(set) var dailyQuoteUrlString = "https://tw.appledaily.com/index/dailyquote/"
   private(set) var weatherUrlString = "https://www.cwb.gov.tw/rss/forecast/36_05.xml"
-  
+  let manager = Alamofire.SessionManager.default  
 }
+
+extension Alamofire.SessionManager {
+  func requestWithoutCache(
+    _ url: URLConvertible,
+    method: HTTPMethod = .get,
+    parameters: Parameters? = nil,
+    encoding: ParameterEncoding = URLEncoding.default,
+    headers: HTTPHeaders? = nil)// also you can add URLRequest.CachePolicy here as parameter
+    -> DataRequest
+  {
+    do {
+    
+      var urlRequest = try URLRequest(url: url, method: method, headers: headers)
+      urlRequest.cachePolicy = .reloadIgnoringCacheData
+      let encodedURLRequest = try encoding.encode(urlRequest, with: parameters)
+      return request(encodedURLRequest)
+    } catch {
+      // TODO: find a better way to handle error
+      print(error)
+      return request(URLRequest(url: URL(string: "http://example.com/wrong_request")!))
+    }
+
+  }
+}
+
 
 extension APIDataStore: WeatherQuoteStoreProtocol {
   
   func fetchForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     fetchforecastXMLByAF { (xmlString, error) in
       guard let xmlString = xmlString else {
-        completion(nil, NetworkError.error(from: error!))
+        completion(nil, error)
         return
       }
       
@@ -39,7 +64,7 @@ extension APIDataStore: WeatherQuoteStoreProtocol {
   func fetchDaliyQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void) {
     fetchDailyQuoteHtmlStringByAF { (htmlString, error) in
       guard let htmlString = htmlString else {
-        completion(nil, NetworkError.error(from: error!))
+        completion(nil, error)
         return
       }
       
@@ -60,7 +85,7 @@ extension APIDataStore: WeatherQuoteStoreProtocol {
 //network private
 extension APIDataStore {
   private func fetchDailyQuoteHtmlStringByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
-    Alamofire.request(dailyQuoteUrlString).validate().responseString { (response) in
+    manager.request(dailyQuoteUrlString).validate().responseString { (response) in
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
@@ -72,11 +97,14 @@ extension APIDataStore {
   }
   
   private func fetchforecastXMLByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
-    Alamofire.request(weatherUrlString).validate().responseString(encoding: .utf8) { (response) in
+    //.request(weatherUrlString).validate().responseString(encoding: .utf8) { (response) in
+    manager.requestWithoutCache(weatherUrlString, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
+           .validate().responseString(encoding: .utf8) { (response) in
+    
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
-        completion(nil, NetworkError.error(from: error))
+        completion(nil, NetworkError.error(from: error)) //WHYYYYYYYY?
       } else {
         assertionFailure("both value and error are nil")
       }

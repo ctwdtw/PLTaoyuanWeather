@@ -26,21 +26,42 @@ class WeatherViewController: UIViewController {
     configureForcastTableView()
     
     weatherController.fetchDataOnLoad { [unowned self] (weatherQuoteVM) in
-      if let error = weatherQuoteVM.displayedError, error.shouldShow == true {
-        //show error
-        return
-      
-      } else if let error = weatherQuoteVM.displayedError, error.shouldShow == false {
-        return
+      if let error = weatherQuoteVM.displayedError {
+        self.displayError(error)
       
       }
-      
       self.reloadQuoteViews(with: weatherQuoteVM)
       self.reloadForecastTableView(with: weatherQuoteVM)
       
     }
     
   }
+  
+  func displayError(_ error: DisplayedError) {
+    if error.shouldShow {
+      showAlertError(error)
+    
+    } else {
+      print("\(error.title):\(error.errorMessage)")
+    
+    }
+  }
+  
+  //TODO:// MOVE TO UIVIewController + Alert
+  private func showAlertError(_ error: DisplayedError) {
+    let alert = UIAlertController(title: error.title,
+                                  message: error.errorMessage,
+                                  preferredStyle: .alert)
+    let okAction = UIAlertAction(title: "OK",
+                                 style: .default) { (_) in
+      alert.dismiss(animated: true, completion: nil)
+                                  
+    }
+    
+    alert.addAction(okAction)
+    present(alert, animated: true, completion: nil)
+  }
+  
   
   private func configureForcastTableView() {
     //delegate
@@ -56,6 +77,9 @@ class WeatherViewController: UIViewController {
     forecastTableView.refreshControl = UIRefreshControl()
     forecastTableView.refreshControl?.tintColor = UIColor.red
     forecastTableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+    
+    //selection
+    forecastTableView.allowsSelection = false
   }
   
   private func reloadQuoteViews(with vm: WeatherQuoteViewModel) {
@@ -73,12 +97,8 @@ class WeatherViewController: UIViewController {
     weatherController.pullToRefreshData { [unowned self] (weatherQuoteVM) in
       self.forecastTableView.refreshControl?.endRefreshing()
       
-      if let error = weatherQuoteVM.displayedError, error.shouldShow == true {
-        //show error
-        return
-      } else if let error = weatherQuoteVM.displayedError, error.shouldShow == false {
-        
-        return
+      if let error = weatherQuoteVM.displayedError {
+        self.displayError(error)
       }
       
       self.reloadQuoteViews(with: weatherQuoteVM)
@@ -109,10 +129,10 @@ class WeatherViewController: UIViewController {
 extension WeatherViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
-      //TODO: - delete model
+      
       weatherController.deleteWeather(at: indexPath) { (displayedForecast, displayedError) in
         guard displayedError == nil else {
-          print(displayedError!)
+          self.displayError(displayedError!)
           return
         }
         
@@ -123,6 +143,9 @@ extension WeatherViewController: UITableViewDelegate {
       
     }
   }
+  
+  
+  
 }
 
 

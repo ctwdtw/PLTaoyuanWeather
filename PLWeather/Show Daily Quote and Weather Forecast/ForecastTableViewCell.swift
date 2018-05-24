@@ -14,17 +14,9 @@ class ForecastTableViewCell: UITableViewCell {
   @IBOutlet weak var lowestTempratureLabel: UILabel!
   @IBOutlet weak var highestTempratureLabel: UILabel!
   @IBOutlet weak var dayOrNightLabel: UILabel!
-  
-  override func awakeFromNib() {
-    super.awakeFromNib()
-    // Initialization code
-  }
-  
+
   override func setSelected(_ selected: Bool, animated: Bool) {
     super.setSelected(selected, animated: animated)
-    
-    // Configure the view for the selected state
   }
 
-  
 }

@@ -15,7 +15,6 @@ enum StorageError: Error {
   case noDataContentAtUrl
 }
 
-
 public class Storage {
   
   fileprivate init() { }

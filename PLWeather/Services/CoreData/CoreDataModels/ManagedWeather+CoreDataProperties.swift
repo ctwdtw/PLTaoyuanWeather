@@ -24,7 +24,9 @@ extension ManagedWeather {
   }
   
   static var defaultSortDescriptor: [NSSortDescriptor] {
-    return [NSSortDescriptor(key: "date", ascending: true)]
+    let sortDescriptorForDate = NSSortDescriptor(key: "date", ascending: true)
+    let sortDescriptorForDayOrNight = NSSortDescriptor(key: "dayOrNightValue", ascending: true)
+    return [sortDescriptorForDate, sortDescriptorForDayOrNight]
   }
   static var defaultSortedFetchRequest: NSFetchRequest<ManagedWeather> {
     let request: NSFetchRequest<ManagedWeather> = ManagedWeather.fetchRequest()

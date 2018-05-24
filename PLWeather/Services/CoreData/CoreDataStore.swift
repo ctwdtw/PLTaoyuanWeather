@@ -134,6 +134,12 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       let request = ManagedForecast.defaultSortedFetchRequest
       
       do {
+        let resultSet = try context.fetch(request)
+        print(resultSet.count)
+        for forecast in resultSet {
+          print(forecast.lastupdate)
+        }
+        
         
         if let managedForecast = try context.fetch(request).first {
           let forecast = managedForecast.toForecast()
@@ -191,6 +197,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       do {
         try context.save()
         self.lastupdateDate.forForecast = forecast.lastupdate
+        self.saveStorage()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(forecast, nil)
@@ -263,6 +270,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       do {
         try context.save()
         self.lastupdateDate.forQuote = quote.date
+        self.saveStorage()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(quote , nil)

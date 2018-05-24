@@ -22,11 +22,15 @@ class WeatherQuotePresenter {
       return vm
       
     } else if let quote = updatedQuote, let forecastError = forecastError {
-      let vm = getWeatherFailedWeatherQuoteVM(quote: quote, forecastError: forecastError)
+      let vm = getWeatherFailedWeatherQuoteVM(quote: quote,
+                                              oldForecast: oldForecast,
+                                              forecastError: forecastError)
       return vm
       
     } else if let quoteError = quoteError, let forecast = updatedForecast {
-      let vm = getQuoteFailedWeatherQuoteVM(quoteError: quoteError, forecast: forecast)
+      let vm = getQuoteFailedWeatherQuoteVM(oldQuote: oldQuote,
+                                            quoteError: quoteError,
+                                            forecast: forecast)
       return vm
       
     } else if let quoteError = quoteError, let forecastError = forecastError {
@@ -198,7 +202,8 @@ class WeatherQuotePresenter {
   }
  
   // quote contains error
-  private func getQuoteFailedWeatherQuoteVM(quoteError: PLErrorProtocol,
+  private func getQuoteFailedWeatherQuoteVM(oldQuote: Quote?,
+                                            quoteError: PLErrorProtocol,
                                             forecast: Forecast) -> WeatherQuoteViewModel {
     var shouldShow = true
     var title = ""
@@ -208,7 +213,7 @@ class WeatherQuotePresenter {
       shouldShow = false
       title = qe.domain
       errorMessage = qe.localizedDescription
-    
+      
     } else {
       shouldShow = true
       title = "無法抓取每日一句"
@@ -221,7 +226,15 @@ class WeatherQuotePresenter {
                                         errorMessage: errorMessage)
     
     let displayedForecast = getDisplayedForecast(from: forecast)
-    let vm = WeatherQuoteViewModel(displayedQuote: DisplayedQuote.empty(),
+    
+    var displayedQuote: DisplayedQuote
+    if let quote = oldQuote {
+      displayedQuote = getDisplayedQuote(from: quote)
+    } else {
+      displayedQuote = DisplayedQuote.empty()
+    }
+    
+    let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
@@ -229,6 +242,7 @@ class WeatherQuotePresenter {
   
   //forecast contains error
   private func getWeatherFailedWeatherQuoteVM(quote: Quote,
+                                              oldForecast: Forecast?,
                                               forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
     var shouldShow = true
     var title = ""
@@ -249,9 +263,19 @@ class WeatherQuotePresenter {
     let displayedError = DisplayedError(shouldShow: shouldShow,
                                         title: title,
                                         errorMessage: errorMessage)
+    
     let displayedQuote = getDisplayedQuote(from: quote)
+    
+    var displayedForecast: DisplayedForecast
+    
+    if let forecast = oldForecast {
+      displayedForecast = getDisplayedForecast(from: forecast)
+    } else {
+      displayedForecast = DisplayedForecast.empty()
+    }
+    
     let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
-                                   displayedForecast: DisplayedForecast.empty(),
+                                   displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
   }

@@ -57,10 +57,16 @@ extension APIDataStore: ForecastStoreProtocol {
       
       do {
         let forecast = try self.getParsedForecast(from: xmlString)
-        completion(forecast, nil)
+        DispatchQueue.main.async {
+          completion(forecast, nil)
+        }
+        
       } catch {
         let e = error as! PLErrorProtocol
-        completion(nil, e) //return parsing error
+        DispatchQueue.main.async {
+          completion(nil, e) //return parsing error
+        }
+        
       }
     
     }
@@ -75,10 +81,16 @@ extension APIDataStore: ForecastStoreProtocol {
       
       do {
         let quote = try self.getParsedDailyQuote(from: htmlString)
-        completion(quote, nil)
+        DispatchQueue.main.async {
+          completion(quote, nil)
+        }
+        
       } catch {
         let e = error as! PLErrorProtocol
-        completion(nil, e) //return parsing error
+        DispatchQueue.main.async {
+          completion(nil, e) //return parsing error
+        }
+        
       }
       
     }
@@ -90,7 +102,7 @@ extension APIDataStore: ForecastStoreProtocol {
 //network private
 extension APIDataStore {
   private func fetchDailyQuoteHtmlStringByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
-    manager.request(dailyQuoteUrlString).validate().responseString { (response) in
+    manager.request(dailyQuoteUrlString).validate().responseString(queue: DispatchQueue.global()) { (response) in
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {
@@ -104,7 +116,7 @@ extension APIDataStore {
   private func fetchforecastXMLByAF(completion: @escaping (String?, PLErrorProtocol?) -> Void) {
     //.request(weatherUrlString).validate().responseString(encoding: .utf8) { (response) in
     manager.requestWithoutCache(weatherUrlString, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
-           .validate().responseString(encoding: .utf8) { (response) in
+      .validate().responseString(queue: DispatchQueue.global(), encoding: .utf8) { (response) in
     
       if let value = response.result.value {
         completion(value, nil)
@@ -133,6 +145,10 @@ struct ParsingConst {
 
 extension APIDataStore {
   func getParsedDailyQuote(from htmlString: String) throws -> Quote {
+    let q = DispatchQueue(label: "parsingQueue", qos: DispatchQoS.default)
+    
+    
+    
     let doc = try SwiftSoup.parse(htmlString)
     guard let body = doc.body() else {
       throw ParsingError.dailyQuoteHtmlHasNoBody

@@ -41,7 +41,7 @@ extension Alamofire.SessionManager {
 }
 
 
-extension APIDataStore: WeatherQuoteStoreProtocol {
+extension APIDataStore: ForecastStoreProtocol {
   
   func fetchForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     fetchforecastXMLByAF { (xmlString, error) in

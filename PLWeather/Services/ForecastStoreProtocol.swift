@@ -8,7 +8,7 @@
 
 import Foundation
 //protocol for remote store
-protocol WeatherQuoteStoreProtocol {
+protocol ForecastStoreProtocol {
   func fetchForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void)
   func fetchDaliyQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void)
   
@@ -20,7 +20,7 @@ struct LastupdateTime: Codable {
 }
 
 //protocol for local store
-protocol WeatherQuoteLocalStoreProtocol: WeatherQuoteStoreProtocol {
+protocol ForecastLocalStoreProtocol: ForecastStoreProtocol {
   var lastupdateDate: LastupdateTime { get }
   func insertDailyQuote(_ quote: Quote, completion: @escaping (_ insertedQuote: Quote?, PLErrorProtocol?) -> Void )
   func insertForecast(_ forecast: Forecast, completion: @escaping (_ insertedForecast: Forecast? ,PLErrorProtocol?) -> Void )

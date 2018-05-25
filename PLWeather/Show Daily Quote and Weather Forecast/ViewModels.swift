@@ -55,7 +55,7 @@ struct DisplayedQuote {
   }
 }
 
-struct WeatherQuoteViewModel {
+struct ForecastQuoteViewModel {
   var displayedQuote: DisplayedQuote?
   var displayedForecast: DisplayedForecast?
   var displayedError: DisplayedError?

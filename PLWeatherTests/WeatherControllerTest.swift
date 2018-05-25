@@ -9,10 +9,10 @@
 import XCTest
 @testable import PLWeather
 class WeatherControllerTest: XCTestCase {
-  var sut: WeatherController!
+  var sut: ForecastController!
   override func setUp() {
     super.setUp()
-    sut = WeatherController()
+    sut = ForecastController()
   }
   
   override func tearDown() {

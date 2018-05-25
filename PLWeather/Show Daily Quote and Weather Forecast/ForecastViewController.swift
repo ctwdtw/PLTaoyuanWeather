@@ -8,33 +8,18 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController {
+class ForecastViewController: UIViewController {
   
   @IBOutlet weak var dailyQuoteLabel: UILabel!
-  
   @IBOutlet weak var authorLabel: UILabel!
-  
   @IBOutlet weak var dateTimeLabel: UILabel!
   @IBOutlet private weak var dailyQuoteTableHeaderView: UIView!
   @IBOutlet private weak var forecastTableView: UITableView!
-  private let weatherController = WeatherController()
+  private let weatherController = ForecastController()
   private var displayedForecast: DisplayedForecast?
   
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    configureForcastTableView()
-    
-    weatherController.fetchDataOnLoad { [unowned self] (weatherQuoteVM) in
-      if let error = weatherQuoteVM.displayedError {
-        self.displayError(error)
-      
-      }
-      self.reloadQuoteViews(with: weatherQuoteVM)
-      self.reloadForecastTableView(with: weatherQuoteVM)
-      
-    }
-    
+  deinit {
+    deinitMessage(from: self)
   }
   
   func displayError(_ error: DisplayedError) {
@@ -44,6 +29,19 @@ class WeatherViewController: UIViewController {
     } else {
       print("\(error.title):\(error.errorMessage)")
     
+    }
+  }
+  
+  @objc @IBAction func refreshData() {
+    weatherController.pullToRefreshData { [unowned self] (weatherQuoteVM) in
+      self.forecastTableView.refreshControl?.endRefreshing()
+      
+      if let error = weatherQuoteVM.displayedError {
+        self.displayError(error)
+      }
+      
+      self.reloadQuoteViews(with: weatherQuoteVM)
+      self.reloadForecastTableView(with: weatherQuoteVM)
     }
   }
   
@@ -82,28 +80,36 @@ class WeatherViewController: UIViewController {
     forecastTableView.allowsSelection = false
   }
   
-  private func reloadQuoteViews(with vm: WeatherQuoteViewModel) {
+  private func reloadQuoteViews(with vm: ForecastQuoteViewModel) {
     dailyQuoteLabel.text = vm.displayedQuote?.quote
     authorLabel.text = vm.displayedQuote?.author
     dateTimeLabel.text = vm.displayedQuote?.displayedDate
   }
   
-  private func reloadForecastTableView(with vm: WeatherQuoteViewModel) {
+  private func reloadForecastTableView(with vm: ForecastQuoteViewModel) {
     displayedForecast = vm.displayedForecast
     forecastTableView.reloadData()
   }
   
-  @objc @IBAction func refreshData() {
-    weatherController.pullToRefreshData { [unowned self] (weatherQuoteVM) in
-      self.forecastTableView.refreshControl?.endRefreshing()
-      
+}
+
+//Life Cycle
+extension ForecastViewController {
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    
+    configureForcastTableView()
+    
+    weatherController.fetchDataOnLoad { [unowned self] (weatherQuoteVM) in
       if let error = weatherQuoteVM.displayedError {
         self.displayError(error)
+        
       }
-      
       self.reloadQuoteViews(with: weatherQuoteVM)
       self.reloadForecastTableView(with: weatherQuoteVM)
+      
     }
+    
   }
   
   override func viewDidLayoutSubviews() {
@@ -123,10 +129,10 @@ class WeatherViewController: UIViewController {
     
   }
   
-  
 }
 
-extension WeatherViewController: UITableViewDelegate {
+
+extension ForecastViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
       
@@ -148,8 +154,7 @@ extension WeatherViewController: UITableViewDelegate {
   
 }
 
-
-extension WeatherViewController: UITableViewDataSource {
+extension ForecastViewController: UITableViewDataSource {
   func numberOfSections(in tableView: UITableView) -> Int {
     return 1
   }

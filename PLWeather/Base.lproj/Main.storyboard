@@ -9,10 +9,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Weather View Controller-->
+        <!--Forecast View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="WeatherViewController" customModule="PLWeather" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ForecastViewController" customModule="PLWeather" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -75,7 +75,7 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" id="dBR-WB-IDf">
-                        <barButtonItem key="leftBarButtonItem" systemItem="refresh" id="r5z-mJ-eDe">
+                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="r5z-mJ-eDe">
                             <connections>
                                 <action selector="refreshData" destination="BYZ-38-t0r" id="Csa-oj-biK"/>
                             </connections>
@@ -91,7 +91,36 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="855.20000000000005" y="-41.829085457271368"/>
+            <point key="canvasLocation" x="1418" y="-42"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="CzI-xN-p1q">
+            <objects>
+                <viewController id="lpv-md-l8Z" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="bZc-kG-KEm">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1a4-qq-1hb">
+                                <rect key="frame" x="44" y="112" width="46" height="30"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <segue destination="BYZ-38-t0r" kind="show" id="kvV-le-PiZ"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="1a4-qq-1hb" firstAttribute="top" secondItem="sWj-JM-mbS" secondAttribute="top" constant="48" id="cdd-am-uyV"/>
+                            <constraint firstItem="1a4-qq-1hb" firstAttribute="leading" secondItem="sWj-JM-mbS" secondAttribute="leading" constant="44" id="s9E-Bc-g2p"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="sWj-JM-mbS"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="lxX-bJ-Dxk"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="CCF-9P-D7Z" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="676" y="-42"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="5iX-4o-vYR">
@@ -104,7 +133,7 @@
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
-                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="BV0-1a-rEt"/>
+                        <segue destination="lpv-md-l8Z" kind="relationship" relationship="rootViewController" id="9Ds-AI-pVC"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nza-4B-xnV" userLabel="First Responder" sceneMemberID="firstResponder"/>

@@ -55,6 +55,7 @@ class CoreDataStore {
   }
   
   deinit {
+    deinitMessage(from: self)
     NotificationCenter.default.removeObserver(self)
   }
   
@@ -93,7 +94,7 @@ extension CoreDataStore {
   }
 }
 
-extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
+extension CoreDataStore: ForecastLocalStoreProtocol {
   func deleteWeather(at index: Int, of forecast: Forecast,
                      completion: @escaping (_ updatedForecast: Forecast?, PLErrorProtocol?) -> Void) {
     let lastupdate = forecast.lastupdate as NSDate
@@ -106,7 +107,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
           context.delete(weatherForDelete)
           try context.save()
           let updatedForecast = forecast.toForecast()
-          
+          self.saveData()
           DispatchQueue.main.async {
             completion(updatedForecast, nil)
           }
@@ -135,10 +136,8 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       
       do {
         let resultSet = try context.fetch(request)
-        print(resultSet.count)
-        for forecast in resultSet {
-          print(forecast.lastupdate)
-        }
+        let count = resultSet.count
+        print("forecastCount:\(count)")
         
         
         if let managedForecast = try context.fetch(request).first {
@@ -197,7 +196,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       do {
         try context.save()
         self.lastupdateDate.forForecast = forecast.lastupdate
-        self.saveStorage()
+        self.saveData()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(forecast, nil)
@@ -221,9 +220,6 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       
       do {
         
-        let resultSet = try context.fetch(request)
-        print(resultSet.count)
-        
         if let managedQuote = try context.fetch(request).first {
           let quote = managedQuote.toQuote()
           DispatchQueue.main.async {
@@ -237,7 +233,6 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
           
         }
         
-        try context.save() // propagate managedObject to view context
         
       } catch {
         DispatchQueue.main.async {
@@ -270,7 +265,7 @@ extension CoreDataStore: WeatherQuoteLocalStoreProtocol {
       do {
         try context.save()
         self.lastupdateDate.forQuote = quote.date
-        self.saveStorage()
+        self.saveData()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(quote , nil)

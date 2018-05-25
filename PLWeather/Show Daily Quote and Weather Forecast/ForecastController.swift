@@ -9,18 +9,18 @@
 import Foundation
 
 //實作在Controller上, 由 VC 呼叫
-protocol WeatherQuoteControllerProtocol {
+protocol ForecastControllerProtocol {
   var forecast: Forecast? { get }
   var quote: Quote? { get }
 }
 
-class WeatherController {
-  private var localStore: WeatherQuoteLocalStoreProtocol = CoreDataStore()
-  private var remoteStore: WeatherQuoteStoreProtocol = APIDataStore()
+class ForecastController {
+  private var localStore: ForecastLocalStoreProtocol = CoreDataStore()
+  private var remoteStore: ForecastStoreProtocol = APIDataStore()
   var forecast: Forecast?
   var quote: Quote?
 
-  private let presenter = WeatherQuotePresenter()
+  private let presenter = ForecastPresenter()
   private var isUpdatingLocalQuote = false
   private var isUpdatingLocalForecast = false
   private var isUpdatingLocaldata: Bool {
@@ -35,6 +35,10 @@ class WeatherController {
   
   private var updateLocalQuoteError: PLErrorProtocol? = nil
   private var updateLocalForecast: PLErrorProtocol? = nil
+ 
+  deinit {
+    deinitMessage(from: self)
+  }
   
 }
 
@@ -47,7 +51,7 @@ class WeatherController {
 //b. pull to fetch
 //  1. 由 remote 端抓取資料，若比資料目前的新，就更新資料並展示，否則return掉。
 
-extension WeatherController: WeatherQuoteControllerProtocol {
+extension ForecastController: ForecastControllerProtocol {
   
   func deleteWeather(at indexPath: IndexPath, completion: @escaping (_ updatedForecast: DisplayedForecast?, DisplayedError?) -> Void) {
     guard let forecast = forecast else {
@@ -73,17 +77,17 @@ extension WeatherController: WeatherQuoteControllerProtocol {
     
   }
   
-  func fetchDataOnLoad(completion: @escaping (WeatherQuoteViewModel) -> Void) {
+  func fetchDataOnLoad(completion: @escaping (ForecastQuoteViewModel) -> Void) {
     fetchLocalQuoteAndForecast { (vm) in
       completion(vm)
       self.pullToRefreshData(completion: completion)
     }
   }
   
-  func pullToRefreshData(completion: @escaping (WeatherQuoteViewModel) -> Void) {
+  func pullToRefreshData(completion: @escaping (ForecastQuoteViewModel) -> Void) {
     updateLocalData { updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
       
-      let vm = self.presenter.getWeatherQuoteViewModel(updatedQuote: updatedQuote,
+      let vm = self.presenter.getForecastQuoteViewModel(updatedQuote: updatedQuote,
                                                        oldQuote: self.quote,
                                                        quoteError: quoteUpdatedError,
                                                        updatedForecast: updatedForecast,
@@ -97,7 +101,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
   
   //FIXME :- performance issue: use `objectForID` to reduce frequency of fetching
   //fetch is expensive
-  func fetchLocalQuoteAndForecast(completion: @escaping (WeatherQuoteViewModel) -> Void) {
+  func fetchLocalQuoteAndForecast(completion: @escaping (ForecastQuoteViewModel) -> Void) {
     
     localStore.fetchDaliyQuote { (quote, quoteError) in
       
@@ -105,7 +109,7 @@ extension WeatherController: WeatherQuoteControllerProtocol {
         
         self.quote = quote
         self.forecast = forecast
-        let vm = self.presenter.getWeatherQuoteViewModel(updatedQuote: quote,
+        let vm = self.presenter.getForecastQuoteViewModel(updatedQuote: quote,
                                                          oldQuote: self.quote,
                                                          quoteError: quoteError,
                                                          updatedForecast: forecast,
@@ -215,16 +219,16 @@ extension WeatherController: WeatherQuoteControllerProtocol {
 
 //MARK: - dependency injection
 struct WatherControllerInjectionWrapper {
-  var localStore: WeatherQuoteLocalStoreProtocol? = nil
-  var remoteStore: WeatherQuoteStoreProtocol? = nil
+  var localStore: ForecastLocalStoreProtocol? = nil
+  var remoteStore: ForecastStoreProtocol? = nil
   
-  init(localStore: WeatherQuoteLocalStoreProtocol? = nil, remoteStore: WeatherQuoteStoreProtocol? = nil) {
+  init(localStore: ForecastLocalStoreProtocol? = nil, remoteStore: ForecastStoreProtocol? = nil) {
     self.localStore = localStore
     self.remoteStore = remoteStore
   }
 }
 
-extension WeatherController: Injectable {
+extension ForecastController: Injectable {
   typealias T = WatherControllerInjectionWrapper
   func inject(_ injected: WatherControllerInjectionWrapper) {
     if let localStore = injected.localStore {

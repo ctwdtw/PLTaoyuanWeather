@@ -9,26 +9,26 @@
 import Foundation
 
 //Presentation logic such as formatting string/Date into string user will see.
-class WeatherQuotePresenter {
-  func getWeatherQuoteViewModel(updatedQuote: Quote?,
+class ForecastPresenter {
+  func getForecastQuoteViewModel(updatedQuote: Quote?,
                                 oldQuote: Quote?,
                                 quoteError: PLErrorProtocol?,
                                 updatedForecast: Forecast?,
                                 oldForecast: Forecast?,
-                                forecastError: PLErrorProtocol?) -> WeatherQuoteViewModel {
+                                forecastError: PLErrorProtocol?) -> ForecastQuoteViewModel {
     
     if let quote = updatedQuote, let forecast = updatedForecast {
-      let vm = getSuccessWeatherQuoteVM(quote: quote, forecast: forecast)
+      let vm = getSuccessForecastQuoteVM(quote: quote, forecast: forecast)
       return vm
       
     } else if let quote = updatedQuote, let forecastError = forecastError {
-      let vm = getWeatherFailedWeatherQuoteVM(quote: quote,
+      let vm = getWeatherFailedForecastQuoteVM(quote: quote,
                                               oldForecast: oldForecast,
                                               forecastError: forecastError)
       return vm
       
     } else if let quoteError = quoteError, let forecast = updatedForecast {
-      let vm = getQuoteFailedWeatherQuoteVM(oldQuote: oldQuote,
+      let vm = getQuoteFailedForecastQuoteVM(oldQuote: oldQuote,
                                             quoteError: quoteError,
                                             forecast: forecast)
       return vm
@@ -41,33 +41,14 @@ class WeatherQuotePresenter {
       return vm
       
     } else if updatedQuote == nil, updatedForecast == nil, quoteError == nil, forecastError == nil {
-      let vm = getEmptyWeatherQuoteVM()
+      let vm = getEmptyForecastQuoteVM()
       return vm
       
     } else {
       fatalError()
       //unexpectPath
     }
-    
-  }
-  
-  
-  private func getDisplayedQuote(from quote: Quote) -> DisplayedQuote {
-    let calendar = Calendar(identifier: .hebrew)
-    let formatter = DateFormatter()
-    formatter.locale = Locale(identifier: "zh_TW")
-    formatter.dateStyle = .medium
-    formatter.calendar = calendar
-    
-    let displayedDate = formatter.string(from: quote.date)
-    
-    let displayedQuote = DisplayedQuote(id: quote.id,
-                                        displayedDate: displayedDate,
-                                        author:quote.author ?? "",
-                                        quote: quote.quote)
-    
-    return displayedQuote
-    
+
   }
   
   func getDisplayedForecast(from forecast: Forecast) -> DisplayedForecast {
@@ -84,7 +65,6 @@ class WeatherQuotePresenter {
                                               displayedWeathers: displayedWeathers)
     return displayedForecast
   }
-  
   
   private func getDisplayedWeather(from weather: Weather) -> DisplayedWeather {
     let calendar = Calendar(identifier: .hebrew)
@@ -105,13 +85,30 @@ class WeatherQuotePresenter {
                             iconDescription: weather.iconDescription.stringRep)
   }
   
+  private func getDisplayedQuote(from quote: Quote) -> DisplayedQuote {
+    let calendar = Calendar(identifier: .hebrew)
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "zh_TW")
+    formatter.dateStyle = .medium
+    formatter.calendar = calendar
+    
+    let displayedDate = formatter.string(from: quote.date)
+    
+    let displayedQuote = DisplayedQuote(id: quote.id,
+                                        displayedDate: displayedDate,
+                                        author:quote.author ?? "",
+                                        quote: quote.quote)
+    
+    return displayedQuote
+    
+  }
   
-  private func getSuccessWeatherQuoteVM(quote: Quote, forecast: Forecast) -> WeatherQuoteViewModel {
+  private func getSuccessForecastQuoteVM(quote: Quote, forecast: Forecast) -> ForecastQuoteViewModel {
     
     let displayedQuote = getDisplayedQuote(from: quote)
     let displayedForecast = getDisplayedForecast(from: forecast)
     
-    let vm = WeatherQuoteViewModel(displayedQuote:displayedQuote,
+    let vm = ForecastQuoteViewModel(displayedQuote:displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: nil)
     return vm
@@ -121,12 +118,12 @@ class WeatherQuotePresenter {
   private func getFailedWeatherQuoteVM(oldQuote: Quote?,
                                        quoteError: PLErrorProtocol,
                                        oldForecast: Forecast?,
-                                       forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
+                                       forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
     
     //debug info for developer
     //let forecastDebugInfo = "\(forecastError.domain):code\(forecastError.code)"
     //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
-        
+    
     var shouldShow = true
     var title = ""
     var errorMessage = ""
@@ -194,17 +191,17 @@ class WeatherQuotePresenter {
                                         title: title,
                                         errorMessage: errorMessage)
     
-    let vm = WeatherQuoteViewModel(displayedQuote:  displayedQuote,
+    let vm = ForecastQuoteViewModel(displayedQuote:  displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
     
   }
- 
+  
   // quote contains error
-  private func getQuoteFailedWeatherQuoteVM(oldQuote: Quote?,
+  private func getQuoteFailedForecastQuoteVM(oldQuote: Quote?,
                                             quoteError: PLErrorProtocol,
-                                            forecast: Forecast) -> WeatherQuoteViewModel {
+                                            forecast: Forecast) -> ForecastQuoteViewModel {
     var shouldShow = true
     var title = ""
     var errorMessage = ""
@@ -218,7 +215,7 @@ class WeatherQuotePresenter {
       shouldShow = true
       title = "無法抓取每日一句"
       errorMessage = quoteError.localizedDescription
-    
+      
     }
     
     let displayedError = DisplayedError(shouldShow: shouldShow,
@@ -234,16 +231,16 @@ class WeatherQuotePresenter {
       displayedQuote = DisplayedQuote.empty()
     }
     
-    let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
+    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
   }
   
   //forecast contains error
-  private func getWeatherFailedWeatherQuoteVM(quote: Quote,
+  private func getWeatherFailedForecastQuoteVM(quote: Quote,
                                               oldForecast: Forecast?,
-                                              forecastError: PLErrorProtocol) -> WeatherQuoteViewModel {
+                                              forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
     var shouldShow = true
     var title = ""
     var errorMessage = ""
@@ -274,21 +271,24 @@ class WeatherQuotePresenter {
       displayedForecast = DisplayedForecast.empty()
     }
     
-    let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
+    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: displayedError)
     return vm
   }
   
   //empty data
-  private func getEmptyWeatherQuoteVM() -> WeatherQuoteViewModel {
+  private func getEmptyForecastQuoteVM() -> ForecastQuoteViewModel {
     let displayedQuote = DisplayedQuote.empty()
     let displayedForecast = DisplayedForecast.empty()
-    let vm = WeatherQuoteViewModel(displayedQuote: displayedQuote,
+    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
                                    displayedForecast: displayedForecast,
                                    displayedError: nil)
     return vm
   }
   
+  deinit {
+    deinitMessage(from: self)
+  }
   
 }

@@ -47,11 +47,12 @@ struct DisplayedError {
 
 struct DisplayedQuote {
   let id: String
+  let displayedCultureDate: String
   let displayedDate: String
   let author: String
   let quote: String
   static func empty() -> DisplayedQuote {
-    return DisplayedQuote(id: "", displayedDate: "暫無資料", author: "暫無資料", quote: "暫無資料")
+    return DisplayedQuote(id: "", displayedCultureDate: "暫無資料", displayedDate: "暫無資料", author: "暫無資料", quote: "暫無資料")
   }
 }
 

@@ -94,15 +94,21 @@ class ForecastPresenter {
   }
   
   private func getDisplayedQuote(from quote: Quote) -> DisplayedQuote {
-    let calendar = Calendar(identifier: .hebrew)
+    let cultureCalendar = Calendar(identifier: .hebrew)
+    let calendar = Calendar(identifier: .gregorian)
+    
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "zh_TW")
     formatter.dateStyle = .medium
-    formatter.calendar = calendar
     
+    formatter.calendar = cultureCalendar
+    let displayedCultureDate = formatter.string(from: quote.date)
+    
+    formatter.calendar = calendar
     let displayedDate = formatter.string(from: quote.date)
-    print(displayedDate)
+    
     let displayedQuote = DisplayedQuote(id: quote.id,
+                                        displayedCultureDate: displayedCultureDate,
                                         displayedDate: displayedDate,
                                         author:quote.author ?? "",
                                         quote: quote.quote)

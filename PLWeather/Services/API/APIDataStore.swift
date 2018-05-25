@@ -51,7 +51,9 @@ extension APIDataStore: ForecastStoreProtocol {
   func fetchForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     fetchforecastXMLByAF { (xmlString, error) in
       guard let xmlString = xmlString else {
-        completion(nil, error)
+        DispatchQueue.main.async {
+          completion(nil, error)
+        }
         return
       }
       
@@ -75,7 +77,9 @@ extension APIDataStore: ForecastStoreProtocol {
   func fetchDaliyQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void) {
     fetchDailyQuoteHtmlStringByAF { (htmlString, error) in
       guard let htmlString = htmlString else {
-        completion(nil, error)
+        DispatchQueue.main.async {
+          completion(nil, error)
+        }
         return
       }
       

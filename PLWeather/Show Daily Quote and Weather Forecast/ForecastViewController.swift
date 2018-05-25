@@ -9,10 +9,11 @@
 import UIKit
 
 class ForecastViewController: UIViewController {
-  
+  @IBOutlet weak var cultureDateTimeLabel: UILabel!
+  @IBOutlet weak var dateTimeLabel: UILabel!
   @IBOutlet weak var dailyQuoteLabel: UILabel!
   @IBOutlet weak var authorLabel: UILabel!
-  @IBOutlet weak var dateTimeLabel: UILabel!
+  
   @IBOutlet private weak var dailyQuoteTableHeaderView: UIView!
   @IBOutlet private weak var forecastTableView: UITableView!
   private let forecastController = ForecastController()
@@ -84,10 +85,12 @@ class ForecastViewController: UIViewController {
     guard  let displayedQuote = vm.displayedQuote else {
       return
     }
-
+    
+    cultureDateTimeLabel.text = displayedQuote.displayedCultureDate
+    dateTimeLabel.text = displayedQuote.displayedDate
     dailyQuoteLabel.text = displayedQuote.quote
     authorLabel.text = displayedQuote.author
-    dateTimeLabel.text = displayedQuote.displayedDate
+    
   }
   
   private func reloadForecastTableView(with vm: ForecastQuoteViewModel) {

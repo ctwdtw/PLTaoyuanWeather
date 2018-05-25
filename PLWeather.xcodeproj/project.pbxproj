@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		63023E7620B7CEA600B6159B /* MemoryAddress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63023E7520B7CEA600B6159B /* MemoryAddress.swift */; };
+		63023E7920B8642300B6159B /* ForecastParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63023E7820B8642300B6159B /* ForecastParser.swift */; };
 		6319739320917BD4008F8AF2 /* ManagedForecast+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6319738F20917BD3008F8AF2 /* ManagedForecast+CoreDataProperties.swift */; };
 		6319739420917BD4008F8AF2 /* ManagedWeather+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6319739020917BD4008F8AF2 /* ManagedWeather+CoreDataClass.swift */; };
 		6319739520917BD4008F8AF2 /* ManagedForecast+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6319739120917BD4008F8AF2 /* ManagedForecast+CoreDataClass.swift */; };
@@ -60,6 +61,7 @@
 		172F4374AAC805FB50AC3A3A /* Pods-PLWeather.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PLWeather.release.xcconfig"; path = "Pods/Target Support Files/Pods-PLWeather/Pods-PLWeather.release.xcconfig"; sourceTree = "<group>"; };
 		4DC06AE361DD2A56778E4927 /* Pods_PLWeather.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_PLWeather.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		63023E7520B7CEA600B6159B /* MemoryAddress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MemoryAddress.swift; sourceTree = "<group>"; };
+		63023E7820B8642300B6159B /* ForecastParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForecastParser.swift; sourceTree = "<group>"; };
 		6319738F20917BD3008F8AF2 /* ManagedForecast+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ManagedForecast+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		6319739020917BD4008F8AF2 /* ManagedWeather+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ManagedWeather+CoreDataClass.swift"; sourceTree = "<group>"; };
 		6319739120917BD4008F8AF2 /* ManagedForecast+CoreDataClass.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ManagedForecast+CoreDataClass.swift"; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				63C55E3920873B640075AACB /* APIDataStore.swift */,
+				63023E7820B8642300B6159B /* ForecastParser.swift */,
 			);
 			path = API;
 			sourceTree = "<group>";
@@ -483,6 +486,7 @@
 				63C55E44208770E50075AACB /* ViewModels.swift in Sources */,
 				6319739420917BD4008F8AF2 /* ManagedWeather+CoreDataClass.swift in Sources */,
 				63D0C41C20949BF700FA087B /* ParsingError.swift in Sources */,
+				63023E7920B8642300B6159B /* ForecastParser.swift in Sources */,
 				63BE46E720881C8B008965F1 /* ManagedQuote.swift in Sources */,
 				6319739620917BD4008F8AF2 /* ManagedWeather+CoreDataProperties.swift in Sources */,
 				6387889920B4153200B8B86A /* APIError.swift in Sources */,

@@ -8,7 +8,6 @@
 
 import Foundation
 
-//實作在Controller上, 由 VC 呼叫
 protocol ForecastControllerProtocol {
   var forecast: Forecast? { get }
   var quote: Quote? { get }
@@ -19,12 +18,12 @@ class ForecastController {
   private var remoteStore: ForecastStoreProtocol = APIDataStore()
   var forecast: Forecast?
   var quote: Quote?
-
+  
   private let presenter = ForecastPresenter()
   private var isUpdatingLocalQuote = false
   private var isUpdatingLocalForecast = false
   private var isUpdatingLocaldata: Bool {
-  
+    
     if isUpdatingLocalQuote == false && isUpdatingLocalForecast == false {
       return false
     } else {
@@ -35,7 +34,7 @@ class ForecastController {
   
   private var updateLocalQuoteError: PLErrorProtocol? = nil
   private var updateLocalForecast: PLErrorProtocol? = nil
- 
+  
   deinit {
     deinitMessage(from: self)
   }
@@ -58,8 +57,8 @@ extension ForecastController: ForecastControllerProtocol {
       fatalError()
     }
     
-    localStore.deleteWeather(at: indexPath.row, of: forecast) { (updatedForecast, error) in
-      self.forecast = updatedForecast
+    localStore.deleteWeather(at: indexPath.row, of: forecast) { [weak self] (updatedForecast, error) in
+      self?.forecast = updatedForecast
       
       guard let updatedForecast = updatedForecast else {
         let displayedError = DisplayedError(shouldShow: true,
@@ -70,7 +69,7 @@ extension ForecastController: ForecastControllerProtocol {
         return
       }
       
-      let displayedForecast = self.presenter.getDisplayedForecast(from: updatedForecast)
+      let displayedForecast = self?.presenter.getDisplayedForecast(from: updatedForecast)
       completion(displayedForecast, nil)
       
     }
@@ -80,43 +79,39 @@ extension ForecastController: ForecastControllerProtocol {
   func fetchDataOnLoad(completion: @escaping (ForecastQuoteViewModel) -> Void) {
     fetchLocalQuoteAndForecast { (vm) in
       completion(vm)
-      self.pullToRefreshData(completion: completion)
     }
   }
   
-  func pullToRefreshData(completion: @escaping (ForecastQuoteViewModel) -> Void) {
-    updateLocalData { updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
+  func refreshData(completion: @escaping (ForecastQuoteViewModel) -> Void) {
+    updateLocalData { [weak self] updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
       
-      let vm = self.presenter.getForecastQuoteViewModel(updatedQuote: updatedQuote,
-                                                       oldQuote: self.quote,
-                                                       quoteError: quoteUpdatedError,
-                                                       updatedForecast: updatedForecast,
-                                                       oldForecast: self.forecast,
-                                                       forecastError: forecastUpdatedError)
+      if let vm = self?.presenter.getForecastQuoteViewModel(updatedQuote: updatedQuote,
+                                                        oldQuote: self?.quote,
+                                                        quoteError: quoteUpdatedError,
+                                                        updatedForecast: updatedForecast,
+                                                        oldForecast: self?.forecast,
+                                                        forecastError: forecastUpdatedError) {
       
-      completion(vm)
-      
-    }
-  }
-  
-  //FIXME :- performance issue: use `objectForID` to reduce frequency of fetching
-  //fetch is expensive
-  func fetchLocalQuoteAndForecast(completion: @escaping (ForecastQuoteViewModel) -> Void) {
-    
-    localStore.fetchDaliyQuote { (quote, quoteError) in
-      
-      self.localStore.fetchForecast { (forecast, forecastError) in
-        
-        self.quote = quote
-        self.forecast = forecast
-        let vm = self.presenter.getForecastQuoteViewModel(updatedQuote: quote,
-                                                         oldQuote: self.quote,
-                                                         quoteError: quoteError,
-                                                         updatedForecast: forecast,
-                                                         oldForecast: self.forecast,
-                                                         forecastError: forecastError)
         completion(vm)
-        
+      }
+    }
+  }
+  
+  private func fetchLocalQuoteAndForecast(completion: @escaping (ForecastQuoteViewModel) -> Void) {
+    localStore.fetchDaliyQuote { [weak self] (quote, quoteError) in
+      
+      self?.localStore.fetchForecast { [weak self] (forecast, forecastError) in
+  
+        self?.quote = quote
+        self?.forecast = forecast
+        if let vm = self?.presenter.getForecastQuoteViewModel(updatedQuote: quote,
+                                                          oldQuote: self?.quote,
+                                                          quoteError: quoteError,
+                                                          updatedForecast: forecast,
+                                                          oldForecast: self?.forecast,
+                                                          forecastError: forecastError) {
+          completion(vm)
+        }
       }
     }
   }
@@ -133,12 +128,12 @@ extension ForecastController: ForecastControllerProtocol {
     var forecastUpdatedError: PLErrorProtocol? = nil
     
     //asynchronously fire remoteRequest
-    updateLocalQuote { updatedQuote, error in
+    updateLocalQuote { [weak self] updatedQuote, error in
       
       quoteUpdatedError = error
       quote = updatedQuote
-  
-      if self.isUpdatingLocaldata == false {
+      
+      if self?.isUpdatingLocaldata == false {
         completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
         
       } else {
@@ -147,12 +142,12 @@ extension ForecastController: ForecastControllerProtocol {
     }
     
     
-    updateLocalForecast { updatedForecast, error in
+    updateLocalForecast { [weak self] updatedForecast, error in
       
       forecastUpdatedError = error
       forecast = updatedForecast
       
-      if self.isUpdatingLocaldata == false {
+      if self?.isUpdatingLocaldata == false {
         completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
         
       } else {
@@ -164,23 +159,23 @@ extension ForecastController: ForecastControllerProtocol {
   
   private func updateLocalForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
     isUpdatingLocalForecast = true
-    remoteStore.fetchForecast { (forecast, error) in
+    remoteStore.fetchForecast { [weak self] (forecast, error) in
       guard let remoteForecast = forecast else {
-        self.isUpdatingLocalForecast = false
+        self?.isUpdatingLocalForecast = false
         completion(nil, error) //web related error
         return
       }
       
-      self.localStore.insertForecast(remoteForecast) { (insteredForecast, error) in
+      self?.localStore.insertForecast(remoteForecast) { [weak self] (insteredForecast, error) in
         guard error == nil else {
-          self.isUpdatingLocalForecast = false
+          self?.isUpdatingLocalForecast = false
           completion(nil, error) //local data store related error
           return
         }
         
         //happy path
-        self.isUpdatingLocalForecast = false
-        self.forecast = insteredForecast
+        self?.isUpdatingLocalForecast = false
+        self?.forecast = insteredForecast
         completion(remoteForecast, nil)
         
       }
@@ -190,23 +185,23 @@ extension ForecastController: ForecastControllerProtocol {
   
   private func updateLocalQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void) {
     isUpdatingLocalQuote = true
-    remoteStore.fetchDaliyQuote { (quote, error) in
+    remoteStore.fetchDaliyQuote { [weak self] (quote, error) in
       guard let remoteQuote = quote else {
-        self.isUpdatingLocalQuote = false
+        self?.isUpdatingLocalQuote = false
         completion(nil, error) //web related error
         return
       }
       
-      self.localStore.insertDailyQuote(remoteQuote) { (insertedQuote, error) in
+      self?.localStore.insertDailyQuote(remoteQuote) { [weak self] (insertedQuote, error) in
         guard error == nil else {
-          self.isUpdatingLocalQuote = false
+          self?.isUpdatingLocalQuote = false
           completion(nil, error) //local store related error
           return
         }
         
         //happy path
-        self.isUpdatingLocalQuote = false
-        self.quote = insertedQuote
+        self?.isUpdatingLocalQuote = false
+        self?.quote = insertedQuote
         completion(remoteQuote, nil)
         
       }

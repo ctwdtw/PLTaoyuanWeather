@@ -98,7 +98,7 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
   func deleteWeather(at index: Int, of forecast: Forecast,
                      completion: @escaping (_ updatedForecast: Forecast?, PLErrorProtocol?) -> Void) {
     let lastupdate = forecast.lastupdate as NSDate
-    persistentContainer.performBackgroundTask { (context) in
+    persistentContainer.performBackgroundTask { [weak self] (context) in
       let request = ManagedForecast.defaultSortedFetchRequest
       request.predicate = NSPredicate(format: "lastupdate == %@", lastupdate)
       do {
@@ -107,7 +107,7 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
           context.delete(weatherForDelete)
           try context.save()
           let updatedForecast = forecast.toForecast()
-          self.saveData()
+          self?.saveData()
           DispatchQueue.main.async {
             completion(updatedForecast, nil)
           }
@@ -179,7 +179,7 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
       return
     }
     
-    persistentContainer.performBackgroundTask { (context) in
+    persistentContainer.performBackgroundTask { [weak self] (context) in
       let managedForecast = ManagedForecast(context: context)
       managedForecast.fromForecast(forecast)
       
@@ -195,8 +195,8 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
       
       do {
         try context.save()
-        self.lastupdateDate.forForecast = forecast.lastupdate
-        self.saveData()
+        self?.lastupdateDate.forForecast = forecast.lastupdate
+        self?.saveData()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(forecast, nil)
@@ -258,14 +258,14 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
       return
     }
   
-    persistentContainer.performBackgroundTask { (context) in
+    persistentContainer.performBackgroundTask { [weak self] (context) in
       let managedQuote = ManagedQuote(context: context)
       managedQuote.fromQuote(quote: quote)
       
       do {
         try context.save()
-        self.lastupdateDate.forQuote = quote.date
-        self.saveData()
+        self?.lastupdateDate.forQuote = quote.date
+        self?.saveData()
         DispatchQueue.main.async {
           //預留空間, 傳回插入的 quote, 將來也許可以對 quote 加點料, 例如插入的 timeStamp 什麼的。
           completion(quote , nil)

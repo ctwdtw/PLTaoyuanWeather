@@ -15,7 +15,7 @@ class ForecastViewController: UIViewController {
   @IBOutlet weak var dateTimeLabel: UILabel!
   @IBOutlet private weak var dailyQuoteTableHeaderView: UIView!
   @IBOutlet private weak var forecastTableView: UITableView!
-  private let weatherController = ForecastController()
+  private let forecastController = ForecastController()
   private var displayedForecast: DisplayedForecast?
   
   deinit {
@@ -25,23 +25,27 @@ class ForecastViewController: UIViewController {
   func displayError(_ error: DisplayedError) {
     if error.shouldShow {
       showAlertError(error)
-    
+      
     } else {
       print("\(error.title):\(error.errorMessage)")
-    
+      
     }
   }
   
   @objc @IBAction func refreshData() {
-    weatherController.pullToRefreshData { [unowned self] (weatherQuoteVM) in
-      self.forecastTableView.refreshControl?.endRefreshing()
+    if forecastTableView.refreshControl?.isRefreshing == false {
+      forecastTableView.refreshControl?.beginRefreshing()
+    }
+    
+    forecastController.refreshData { [weak self] (weatherQuoteVM) in
+      self?.forecastTableView.refreshControl?.endRefreshing()
       
       if let error = weatherQuoteVM.displayedError {
-        self.displayError(error)
+        self?.displayError(error)
       }
       
-      self.reloadQuoteViews(with: weatherQuoteVM)
-      self.reloadForecastTableView(with: weatherQuoteVM)
+      self?.reloadQuoteViews(with: weatherQuoteVM)
+      self?.reloadForecastTableView(with: weatherQuoteVM)
     }
   }
   
@@ -52,7 +56,7 @@ class ForecastViewController: UIViewController {
                                   preferredStyle: .alert)
     let okAction = UIAlertAction(title: "OK",
                                  style: .default) { (_) in
-      alert.dismiss(animated: true, completion: nil)
+                                  alert.dismiss(animated: true, completion: nil)
                                   
     }
     
@@ -73,7 +77,7 @@ class ForecastViewController: UIViewController {
     
     //refresh control
     forecastTableView.refreshControl = UIRefreshControl()
-    forecastTableView.refreshControl?.tintColor = UIColor.red
+    forecastTableView.refreshControl?.tintColor = UIColor.blue
     forecastTableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
     
     //selection
@@ -95,19 +99,20 @@ class ForecastViewController: UIViewController {
 
 //Life Cycle
 extension ForecastViewController {
+  
   override func viewDidLoad() {
     super.viewDidLoad()
     
     configureForcastTableView()
     
-    weatherController.fetchDataOnLoad { [unowned self] (weatherQuoteVM) in
+    forecastController.fetchDataOnLoad { [weak self] (weatherQuoteVM) in
       if let error = weatherQuoteVM.displayedError {
-        self.displayError(error)
+        self?.displayError(error)
         
       }
-      self.reloadQuoteViews(with: weatherQuoteVM)
-      self.reloadForecastTableView(with: weatherQuoteVM)
-      
+      self?.reloadQuoteViews(with: weatherQuoteVM)
+      self?.reloadForecastTableView(with: weatherQuoteVM)
+      self?.refreshData() //after local data fetched and displayed, check if there is remote data to be download
     }
     
   }
@@ -136,7 +141,7 @@ extension ForecastViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
       
-      weatherController.deleteWeather(at: indexPath) { (displayedForecast, displayedError) in
+      forecastController.deleteWeather(at: indexPath) { (displayedForecast, displayedError) in
         guard displayedError == nil else {
           self.displayError(displayedError!)
           return

@@ -13,7 +13,12 @@ import SwiftSoup
 class APIDataStore {
   private(set) var dailyQuoteUrlString = "https://tw.appledaily.com/index/dailyquote/"
   private(set) var weatherUrlString = "https://www.cwb.gov.tw/rss/forecast/36_05.xml"
-  let manager = Alamofire.SessionManager.default  
+  let manager = Alamofire.SessionManager.default
+  
+  deinit {
+    deinitMessage(from: self)
+  }
+  
 }
 
 extension Alamofire.SessionManager {

@@ -11,11 +11,11 @@ import Foundation
 //Presentation logic such as formatting string/Date into string user will see.
 class ForecastPresenter {
   func getForecastQuoteViewModel(updatedQuote: Quote?,
-                                oldQuote: Quote?,
-                                quoteError: PLErrorProtocol?,
-                                updatedForecast: Forecast?,
-                                oldForecast: Forecast?,
-                                forecastError: PLErrorProtocol?) -> ForecastQuoteViewModel {
+                                 oldQuote: Quote?,
+                                 quoteError: PLErrorProtocol?,
+                                 updatedForecast: Forecast?,
+                                 oldForecast: Forecast?,
+                                 forecastError: PLErrorProtocol?) -> ForecastQuoteViewModel {
     
     if let quote = updatedQuote, let forecast = updatedForecast {
       let vm = getSuccessForecastQuoteVM(quote: quote, forecast: forecast)
@@ -23,14 +23,14 @@ class ForecastPresenter {
       
     } else if let quote = updatedQuote, let forecastError = forecastError {
       let vm = getWeatherFailedForecastQuoteVM(quote: quote,
-                                              oldForecast: oldForecast,
-                                              forecastError: forecastError)
+                                               oldForecast: oldForecast,
+                                               forecastError: forecastError)
       return vm
       
     } else if let quoteError = quoteError, let forecast = updatedForecast {
       let vm = getQuoteFailedForecastQuoteVM(oldQuote: oldQuote,
-                                            quoteError: quoteError,
-                                            forecast: forecast)
+                                             quoteError: quoteError,
+                                             forecast: forecast)
       return vm
       
     } else if let quoteError = quoteError, let forecastError = forecastError {
@@ -48,7 +48,7 @@ class ForecastPresenter {
       fatalError()
       //unexpectPath
     }
-
+    
   }
   
   func getDisplayedForecast(from forecast: Forecast) -> DisplayedForecast {
@@ -109,8 +109,8 @@ class ForecastPresenter {
     let displayedForecast = getDisplayedForecast(from: forecast)
     
     let vm = ForecastQuoteViewModel(displayedQuote:displayedQuote,
-                                   displayedForecast: displayedForecast,
-                                   displayedError: nil)
+                                    displayedForecast: displayedForecast,
+                                    displayedError: nil)
     return vm
   }
   
@@ -192,16 +192,16 @@ class ForecastPresenter {
                                         errorMessage: errorMessage)
     
     let vm = ForecastQuoteViewModel(displayedQuote:  displayedQuote,
-                                   displayedForecast: displayedForecast,
-                                   displayedError: displayedError)
+                                    displayedForecast: displayedForecast,
+                                    displayedError: displayedError)
     return vm
     
   }
   
   // quote contains error
   private func getQuoteFailedForecastQuoteVM(oldQuote: Quote?,
-                                            quoteError: PLErrorProtocol,
-                                            forecast: Forecast) -> ForecastQuoteViewModel {
+                                             quoteError: PLErrorProtocol,
+                                             forecast: Forecast) -> ForecastQuoteViewModel {
     var shouldShow = true
     var title = ""
     var errorMessage = ""
@@ -232,15 +232,15 @@ class ForecastPresenter {
     }
     
     let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                   displayedForecast: displayedForecast,
-                                   displayedError: displayedError)
+                                    displayedForecast: displayedForecast,
+                                    displayedError: displayedError)
     return vm
   }
   
   //forecast contains error
   private func getWeatherFailedForecastQuoteVM(quote: Quote,
-                                              oldForecast: Forecast?,
-                                              forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
+                                               oldForecast: Forecast?,
+                                               forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
     var shouldShow = true
     var title = ""
     var errorMessage = ""
@@ -272,8 +272,8 @@ class ForecastPresenter {
     }
     
     let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                   displayedForecast: displayedForecast,
-                                   displayedError: displayedError)
+                                    displayedForecast: displayedForecast,
+                                    displayedError: displayedError)
     return vm
   }
   
@@ -282,8 +282,8 @@ class ForecastPresenter {
     let displayedQuote = DisplayedQuote.empty()
     let displayedForecast = DisplayedForecast.empty()
     let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                   displayedForecast: displayedForecast,
-                                   displayedError: nil)
+                                    displayedForecast: displayedForecast,
+                                    displayedError: nil)
     return vm
   }
   

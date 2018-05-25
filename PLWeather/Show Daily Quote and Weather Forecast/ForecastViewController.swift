@@ -33,7 +33,6 @@ class ForecastViewController: UIViewController {
   }
   
   @objc @IBAction func refreshData() {
-    
     forecastController.refreshData { [weak self] (weatherQuoteVM) in
       self?.forecastTableView.refreshControl?.endRefreshing()
       
@@ -104,7 +103,6 @@ class ForecastViewController: UIViewController {
 
 //Life Cycle
 extension ForecastViewController {
-  
   override func viewDidLoad() {
     super.viewDidLoad()
     

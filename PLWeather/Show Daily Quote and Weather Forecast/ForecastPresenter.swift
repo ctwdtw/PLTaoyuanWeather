@@ -61,14 +61,13 @@ class ForecastPresenter {
   }
   
   func getDisplayedForecast(from forecast: Forecast) -> DisplayedForecast {
-    let calendar = Calendar(identifier: .hebrew)
+    let calendar = Calendar(identifier: .gregorian)
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "zh_TW")
     formatter.dateStyle = .medium
     formatter.calendar = calendar
     
     let displayedDate = formatter.string(from: forecast.lastupdate)
-    
     let displayedWeathers = forecast.weathers.map { getDisplayedWeather(from: $0)  }
     let displayedForecast = DisplayedForecast(displayedDate: displayedDate,
                                               displayedWeathers: displayedWeathers)
@@ -76,10 +75,10 @@ class ForecastPresenter {
   }
   
   private func getDisplayedWeather(from weather: Weather) -> DisplayedWeather {
-    let calendar = Calendar(identifier: .hebrew)
+    let calendar = Calendar(identifier: .gregorian)
     let formatter = DateFormatter()
     formatter.locale = Locale(identifier: "zh_TW")
-    formatter.dateStyle = .medium
+    formatter.dateFormat = "MM/dd"
     formatter.calendar = calendar
     
     let displayedDate = formatter.string(from: weather.date)
@@ -102,7 +101,7 @@ class ForecastPresenter {
     formatter.calendar = calendar
     
     let displayedDate = formatter.string(from: quote.date)
-    
+    print(displayedDate)
     let displayedQuote = DisplayedQuote(id: quote.id,
                                         displayedDate: displayedDate,
                                         author:quote.author ?? "",

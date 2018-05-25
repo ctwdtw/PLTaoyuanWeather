@@ -190,7 +190,7 @@ extension WeatherDescription {
     case .rainy: return "🌧"           // 陰時有雨、陰時多雲短暫雨
     case .stormy: return "⛈"          // 有“暴雨”字
     case .snowy: return "❄️"           // 有“雪”字
-    case .unknown(let value): return "❓：\(value)"
+    case .unknown(let value): return "\(value)"
     }
   }
 }
@@ -212,8 +212,8 @@ enum DayOrNight: Int {
 extension DayOrNight {
   var stringRep: String {
     switch self {
-    case .day: return "Day"
-    case .night: return "Night"
+    case .day: return "☀️"
+    case .night: return "🌙"
     }
   }
 }

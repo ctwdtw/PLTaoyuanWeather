@@ -63,6 +63,8 @@ extension NetworkError {
       case NSURLErrorNotConnectedToInternet:
         return NetworkError.couldNotConnectToInternet
       case NSURLErrorCannotConnectToHost:
+        let userInfo = nserror.userInfo
+        
         print("")
       case NSURLErrorTimedOut:
         print("")

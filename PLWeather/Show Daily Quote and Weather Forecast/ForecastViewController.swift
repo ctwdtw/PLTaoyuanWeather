@@ -33,9 +33,6 @@ class ForecastViewController: UIViewController {
   }
   
   @objc @IBAction func refreshData() {
-    if forecastTableView.refreshControl?.isRefreshing == false {
-      forecastTableView.refreshControl?.beginRefreshing()
-    }
     
     forecastController.refreshData { [weak self] (weatherQuoteVM) in
       self?.forecastTableView.refreshControl?.endRefreshing()
@@ -85,13 +82,21 @@ class ForecastViewController: UIViewController {
   }
   
   private func reloadQuoteViews(with vm: ForecastQuoteViewModel) {
-    dailyQuoteLabel.text = vm.displayedQuote?.quote
-    authorLabel.text = vm.displayedQuote?.author
-    dateTimeLabel.text = vm.displayedQuote?.displayedDate
+    guard  let displayedQuote = vm.displayedQuote else {
+      return
+    }
+
+    dailyQuoteLabel.text = displayedQuote.quote
+    authorLabel.text = displayedQuote.author
+    dateTimeLabel.text = displayedQuote.displayedDate
   }
   
   private func reloadForecastTableView(with vm: ForecastQuoteViewModel) {
-    displayedForecast = vm.displayedForecast
+    guard let displayedForecast = vm.displayedForecast else {
+      return
+    }
+    
+    self.displayedForecast = displayedForecast
     forecastTableView.reloadData()
   }
   
@@ -154,9 +159,6 @@ extension ForecastViewController: UITableViewDelegate {
       
     }
   }
-  
-  
-  
 }
 
 extension ForecastViewController: UITableViewDataSource {

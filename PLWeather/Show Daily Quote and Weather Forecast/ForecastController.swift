@@ -86,12 +86,12 @@ extension ForecastController: ForecastControllerProtocol {
     updateLocalData { [weak self] updatedQuote, quoteUpdatedError, updatedForecast, forecastUpdatedError in
       
       if let vm = self?.presenter.getForecastQuoteViewModel(updatedQuote: updatedQuote,
-                                                        oldQuote: self?.quote,
-                                                        quoteError: quoteUpdatedError,
-                                                        updatedForecast: updatedForecast,
-                                                        oldForecast: self?.forecast,
-                                                        forecastError: forecastUpdatedError) {
-      
+                                                            oldQuote: self?.quote,
+                                                            quoteError: quoteUpdatedError,
+                                                            updatedForecast: updatedForecast,
+                                                            oldForecast: self?.forecast,
+                                                            forecastError: forecastUpdatedError) {
+        
         completion(vm)
       }
     }
@@ -101,15 +101,15 @@ extension ForecastController: ForecastControllerProtocol {
     localStore.fetchDaliyQuote { [weak self] (quote, quoteError) in
       
       self?.localStore.fetchForecast { [weak self] (forecast, forecastError) in
-  
+        
         self?.quote = quote
         self?.forecast = forecast
         if let vm = self?.presenter.getForecastQuoteViewModel(updatedQuote: quote,
-                                                          oldQuote: self?.quote,
-                                                          quoteError: quoteError,
-                                                          updatedForecast: forecast,
-                                                          oldForecast: self?.forecast,
-                                                          forecastError: forecastError) {
+                                                              oldQuote: self?.quote,
+                                                              quoteError: quoteError,
+                                                              updatedForecast: forecast,
+                                                              oldForecast: self?.forecast,
+                                                              forecastError: forecastError) {
           completion(vm)
         }
       }
@@ -117,10 +117,10 @@ extension ForecastController: ForecastControllerProtocol {
   }
   
   private func updateLocalData(completion: @escaping (Quote?, PLErrorProtocol?, Forecast?, PLErrorProtocol?) -> Void) {
-    guard isUpdatingLocaldata == false else {
-      print("cancle update this time")
-      return //cancel upate for this time
-    }
+//    guard isUpdatingLocaldata == false else {
+//      print("cancle update this time")
+//      return //cancel upate for this time
+//    }
     
     var quote: Quote? = nil
     var forecast: Forecast? = nil
@@ -129,30 +129,31 @@ extension ForecastController: ForecastControllerProtocol {
     
     //asynchronously fire remoteRequest
     updateLocalQuote { [weak self] updatedQuote, error in
+      guard self?.isUpdatingLocalQuote == false else {
+        print("cancel update local quote this time")
+        return
+      }
       
       quoteUpdatedError = error
       quote = updatedQuote
       
-      if self?.isUpdatingLocaldata == false {
-        completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
-        
-      } else {
-        //print("waiting for update local forecast...")
-      }
+      completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
+      print("updatedLocalQuote with completion executed.")
+      
     }
     
-    
     updateLocalForecast { [weak self] updatedForecast, error in
+      guard self?.isUpdatingLocalForecast == false else {
+        print("cancel update local forecast this time")
+        return
+      }
       
       forecastUpdatedError = error
       forecast = updatedForecast
       
-      if self?.isUpdatingLocaldata == false {
-        completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
-        
-      } else {
-        //print("waiting for update local quote...")
-      }
+      completion(quote, quoteUpdatedError, forecast, forecastUpdatedError)
+      print("updatedLocalForecast with completion executed")
+      
     }
     
   }

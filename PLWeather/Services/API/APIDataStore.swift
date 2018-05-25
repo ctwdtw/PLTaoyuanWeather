@@ -118,7 +118,7 @@ extension APIDataStore {
   
 }
 
-//MARK: - parsing, can be stuff into a class
+//MARK: - parsing, can be move into a class
 struct ParsingConst {
   //quote
   static let article = "dphs"

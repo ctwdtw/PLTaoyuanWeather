@@ -17,36 +17,45 @@ class ForecastPresenter {
                                  oldForecast: Forecast?,
                                  forecastError: PLErrorProtocol?) -> ForecastQuoteViewModel {
     
-    if let quote = updatedQuote, let forecast = updatedForecast {
-      let vm = getSuccessForecastQuoteVM(quote: quote, forecast: forecast)
-      return vm
+    if let quote = updatedQuote, let forecast = updatedForecast, quoteError == nil, forecastError == nil {
+      let dq = getDisplayedQuote(from: quote)
+      let df = getDisplayedForecast(from: forecast)
+      return ForecastQuoteViewModel(displayedQuote: dq, displayedForecast: df)
       
-    } else if let quote = updatedQuote, let forecastError = forecastError {
-      let vm = getWeatherFailedForecastQuoteVM(quote: quote,
-                                               oldForecast: oldForecast,
-                                               forecastError: forecastError)
-      return vm
+    } else if let quote = updatedQuote, quoteError == nil {
+      let dq = getDisplayedQuote(from: quote)
+      return ForecastQuoteViewModel(displayedQuote: dq)
       
-    } else if let quoteError = quoteError, let forecast = updatedForecast {
-      let vm = getQuoteFailedForecastQuoteVM(oldQuote: oldQuote,
-                                             quoteError: quoteError,
-                                             forecast: forecast)
-      return vm
+    } else if let forecast = updatedForecast, forecastError == nil {
+      let df = getDisplayedForecast(from: forecast)
+      return ForecastQuoteViewModel(displayedForecast: df)
       
-    } else if let quoteError = quoteError, let forecastError = forecastError {
-      let vm = getFailedWeatherQuoteVM(oldQuote: oldQuote,
-                                       quoteError: quoteError,
-                                       oldForecast: oldForecast,
-                                       forecastError: forecastError)
-      return vm
+    } else if let qe = quoteError as? CoreDataError, case .noNeedToUpdateQuote = qe {
+      let de = DisplayedError(shouldShow: false, title: qe.domain, errorMessage: qe.localizedDescription)
+      let dq = oldQuote == nil ? DisplayedQuote.empty() : getDisplayedQuote(from: oldQuote!)
+      return ForecastQuoteViewModel(displayedQuote: dq, displayedError: de)
       
-    } else if updatedQuote == nil, updatedForecast == nil, quoteError == nil, forecastError == nil {
-      let vm = getEmptyForecastQuoteVM()
-      return vm
+    } else if let fe = forecastError as? CoreDataError, case .noNeedToUpdateForecast = fe {
+      let de = DisplayedError(shouldShow: false, title: fe.domain, errorMessage: fe.localizedDescription)
+      let df = oldForecast == nil ? DisplayedForecast.empty() : getDisplayedForecast(from: oldForecast!)
+      return ForecastQuoteViewModel(displayedForecast: df, displayedError: de)
+      
+    } else if let qe = quoteError {
+      let de = DisplayedError(shouldShow: false, title: qe.domain, errorMessage: qe.localizedDescription)
+      return ForecastQuoteViewModel(displayedError: de)
+      
+    } else if let fe = forecastError {
+      let de = DisplayedError(shouldShow: false, title: fe.domain, errorMessage: fe.localizedDescription)
+      return ForecastQuoteViewModel(displayedError: de)
+      
+    } else if updatedQuote == nil, oldQuote == nil, quoteError == nil,
+              updatedForecast == nil, oldForecast == nil, forecastError == nil{
+      let dq = DisplayedQuote.empty()
+      let df = DisplayedForecast.empty()
+      return ForecastQuoteViewModel(displayedQuote: dq, displayedForecast: df)
       
     } else {
       fatalError()
-      //unexpectPath
     }
     
   }
@@ -101,190 +110,6 @@ class ForecastPresenter {
     
     return displayedQuote
     
-  }
-  
-  private func getSuccessForecastQuoteVM(quote: Quote, forecast: Forecast) -> ForecastQuoteViewModel {
-    
-    let displayedQuote = getDisplayedQuote(from: quote)
-    let displayedForecast = getDisplayedForecast(from: forecast)
-    
-    let vm = ForecastQuoteViewModel(displayedQuote:displayedQuote,
-                                    displayedForecast: displayedForecast,
-                                    displayedError: nil)
-    return vm
-  }
-  
-  //both forecast and quote contains error
-  private func getFailedWeatherQuoteVM(oldQuote: Quote?,
-                                       quoteError: PLErrorProtocol,
-                                       oldForecast: Forecast?,
-                                       forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
-    
-    //debug info for developer
-    //let forecastDebugInfo = "\(forecastError.domain):code\(forecastError.code)"
-    //let quoteDebugInfo = "\(quoteError.domain):code\(quoteError.code)"
-    
-    var shouldShow = true
-    var title = ""
-    var errorMessage = ""
-    
-    let matchError = (quoteError as? CoreDataError, forecastError as? CoreDataError)
-    switch matchError {
-    case (.some(.noNeedToUpdateQuote), .some(.noNeedToUpdateForecast)):
-      let error = CoreDataError.noNeedToUpdateData
-      shouldShow = false
-      title = error.domain
-      errorMessage = error.localizedDescription
-      
-    case (.some(.noNeedToUpdateQuote), nil):
-      shouldShow = true
-      title = forecastError.domain
-      errorMessage = forecastError.localizedDescription
-      
-    case (nil, .some(.noNeedToUpdateForecast)):
-      
-      shouldShow = true
-      title = quoteError.domain
-      errorMessage = quoteError.localizedDescription
-      
-    case (nil, nil):
-      if let qe = quoteError as? NetworkError,
-        case NetworkError.couldNotConnectToInternet = qe,
-        let fe = forecastError as? NetworkError,
-        case NetworkError.couldNotConnectToInternet = fe {
-        
-        shouldShow = true
-        title = qe.domain
-        errorMessage = qe.localizedDescription
-        
-      } else {
-        print(quoteError)
-        print(forecastError)
-        
-      }
-      
-    default:
-      print(quoteError)
-      print(forecastError)
-    }
-    
-    let displayedQuote: DisplayedQuote
-    if let oldQuote = oldQuote {
-      displayedQuote = getDisplayedQuote(from: oldQuote)
-      
-    } else {
-      displayedQuote = DisplayedQuote.empty()
-      
-    }
-    
-    let displayedForecast : DisplayedForecast
-    
-    if let oldForecast = oldForecast {
-      displayedForecast = getDisplayedForecast(from: oldForecast)
-      
-    } else {
-      displayedForecast = DisplayedForecast.empty()
-      
-    }
-    
-    let displayedError = DisplayedError(shouldShow: shouldShow,
-                                        title: title,
-                                        errorMessage: errorMessage)
-    
-    let vm = ForecastQuoteViewModel(displayedQuote:  displayedQuote,
-                                    displayedForecast: displayedForecast,
-                                    displayedError: displayedError)
-    return vm
-    
-  }
-  
-  // quote contains error
-  private func getQuoteFailedForecastQuoteVM(oldQuote: Quote?,
-                                             quoteError: PLErrorProtocol,
-                                             forecast: Forecast) -> ForecastQuoteViewModel {
-    var shouldShow = true
-    var title = ""
-    var errorMessage = ""
-    if let qe = quoteError as? CoreDataError,
-      case .noNeedToUpdateQuote = qe {
-      shouldShow = false
-      title = qe.domain
-      errorMessage = qe.localizedDescription
-      
-    } else {
-      shouldShow = true
-      title = "無法抓取每日一句"
-      errorMessage = quoteError.localizedDescription
-      
-    }
-    
-    let displayedError = DisplayedError(shouldShow: shouldShow,
-                                        title: title,
-                                        errorMessage: errorMessage)
-    
-    let displayedForecast = getDisplayedForecast(from: forecast)
-    
-    var displayedQuote: DisplayedQuote
-    if let quote = oldQuote {
-      displayedQuote = getDisplayedQuote(from: quote)
-    } else {
-      displayedQuote = DisplayedQuote.empty()
-    }
-    
-    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                    displayedForecast: displayedForecast,
-                                    displayedError: displayedError)
-    return vm
-  }
-  
-  //forecast contains error
-  private func getWeatherFailedForecastQuoteVM(quote: Quote,
-                                               oldForecast: Forecast?,
-                                               forecastError: PLErrorProtocol) -> ForecastQuoteViewModel {
-    var shouldShow = true
-    var title = ""
-    var errorMessage = ""
-    if let fe = forecastError as? CoreDataError,
-      case .noNeedToUpdateQuote = fe {
-      shouldShow = false
-      title = fe.domain
-      errorMessage = fe.localizedDescription
-      
-    } else {
-      shouldShow = true
-      title = "無法抓取氣象資料"
-      errorMessage = forecastError.localizedDescription
-      
-    }
-    
-    let displayedError = DisplayedError(shouldShow: shouldShow,
-                                        title: title,
-                                        errorMessage: errorMessage)
-    
-    let displayedQuote = getDisplayedQuote(from: quote)
-    
-    var displayedForecast: DisplayedForecast
-    
-    if let forecast = oldForecast {
-      displayedForecast = getDisplayedForecast(from: forecast)
-    } else {
-      displayedForecast = DisplayedForecast.empty()
-    }
-    
-    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                    displayedForecast: displayedForecast,
-                                    displayedError: displayedError)
-    return vm
-  }
-  
-  //empty data
-  private func getEmptyForecastQuoteVM() -> ForecastQuoteViewModel {
-    let displayedQuote = DisplayedQuote.empty()
-    let displayedForecast = DisplayedForecast.empty()
-    let vm = ForecastQuoteViewModel(displayedQuote: displayedQuote,
-                                    displayedForecast: displayedForecast,
-                                    displayedError: nil)
-    return vm
   }
   
   deinit {

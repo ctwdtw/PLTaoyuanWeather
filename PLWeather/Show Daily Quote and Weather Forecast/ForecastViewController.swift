@@ -13,72 +13,79 @@ class ForecastViewController: UIViewController {
   @IBOutlet weak var dateTimeLabel: UILabel!
   @IBOutlet weak var dailyQuoteLabel: UILabel!
   @IBOutlet weak var authorLabel: UILabel!
-  
   @IBOutlet private weak var dailyQuoteTableHeaderView: UIView!
   @IBOutlet private weak var forecastTableView: UITableView!
+  
   private let forecastController = ForecastController()
   private var displayedForecast: DisplayedForecast?
+  private var errorsToBeDisplayed: [DisplayedError] = []
   
   deinit {
     deinitMessage(from: self)
   }
   
+  
+  //MARK:/ - display logic
   func displayError(_ error: DisplayedError) {
-    if error.shouldShow {
-      showAlertError(error)
-      
-    } else {
+    
+    guard error.shouldShow else {
       print("\(error.title):\(error.errorMessage)")
+      return
+    }
+    
+    let okHandler = {
+      self.errorsToBeDisplayed.remove(at: 0)
+      if let nextError = self.errorsToBeDisplayed.first {
+        self.displayError(nextError)
+      }
+    }
+    
+    if errorsToBeDisplayed.count == 0 { //隊伍裡沒人
+      errorsToBeDisplayed.append(error)
+      showAlertError(error, okHandler: okHandler)
+    
+    } else if errorsToBeDisplayed.index(of: error) == 0 { //隊伍裡我第一個
+      showAlertError(error, okHandler: okHandler)
+      
+    } else { //隊伍中有其他人
+      guard isContentDuplicated(for: error) == false else { //沒人跟我顯示一樣的錯誤訊息
+        return
+      }
+      errorsToBeDisplayed.append(error) //去排隊
       
     }
+    
   }
   
+  private func isContentDuplicated(for error: DisplayedError) -> Bool {
+    var isDuplicated = false
+    for e in errorsToBeDisplayed {
+      if e.isContentEqual(to: error) {
+        isDuplicated = true
+        break
+      }
+
+    }
+    return isDuplicated
+  }
+  
+  
+  //MARK: - user request
   @objc @IBAction func refreshData() {
     forecastController.refreshData { [weak self] (weatherQuoteVM) in
       self?.forecastTableView.refreshControl?.endRefreshing()
+      self?.forecastTableView.setContentOffset(CGPoint.zero, animated: true)// work around
       
       if let error = weatherQuoteVM.displayedError {
         self?.displayError(error)
+      
+      } else {
+        self?.reloadQuoteViews(with: weatherQuoteVM)
+        self?.reloadForecastTableView(with: weatherQuoteVM)
+      
       }
       
-      self?.reloadQuoteViews(with: weatherQuoteVM)
-      self?.reloadForecastTableView(with: weatherQuoteVM)
     }
-  }
-  
-  //TODO:// MOVE TO UIVIewController + Alert
-  private func showAlertError(_ error: DisplayedError) {
-    let alert = UIAlertController(title: error.title,
-                                  message: error.errorMessage,
-                                  preferredStyle: .alert)
-    let okAction = UIAlertAction(title: "OK",
-                                 style: .default) { (_) in
-                                  alert.dismiss(animated: true, completion: nil)
-                                  
-    }
-    
-    alert.addAction(okAction)
-    present(alert, animated: true, completion: nil)
-  }
-  
-  
-  private func configureForcastTableView() {
-    //delegate
-    forecastTableView.delegate = self
-    forecastTableView.dataSource = self
-    
-    //layout
-    forecastTableView.register(R.nib.forecastTableViewCell)
-    forecastTableView.estimatedRowHeight = 200
-    forecastTableView.rowHeight = UITableViewAutomaticDimension
-    
-    //refresh control
-    forecastTableView.refreshControl = UIRefreshControl()
-    forecastTableView.refreshControl?.tintColor = UIColor.blue
-    forecastTableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-    
-    //selection
-    forecastTableView.allowsSelection = false
   }
   
   private func reloadQuoteViews(with vm: ForecastQuoteViewModel) {
@@ -102,6 +109,7 @@ class ForecastViewController: UIViewController {
     forecastTableView.reloadData()
   }
   
+  
 }
 
 //Life Cycle
@@ -111,16 +119,37 @@ extension ForecastViewController {
     
     configureForcastTableView()
     
-    forecastController.fetchDataOnLoad { [weak self] (weatherQuoteVM) in
+    forecastController.fetchLocalData { [weak self] (weatherQuoteVM) in
       if let error = weatherQuoteVM.displayedError {
         self?.displayError(error)
         
+      } else {
+        self?.reloadQuoteViews(with: weatherQuoteVM)
+        self?.reloadForecastTableView(with: weatherQuoteVM)
+        self?.refreshData() //after local data fetched and displayed, check if there is remote data to be download
       }
-      self?.reloadQuoteViews(with: weatherQuoteVM)
-      self?.reloadForecastTableView(with: weatherQuoteVM)
-      self?.refreshData() //after local data fetched and displayed, check if there is remote data to be download
+    
     }
     
+  }
+  
+  private func configureForcastTableView() {
+    //delegate
+    forecastTableView.delegate = self
+    forecastTableView.dataSource = self
+    
+    //layout
+    forecastTableView.register(R.nib.forecastTableViewCell)
+    forecastTableView.estimatedRowHeight = 200
+    forecastTableView.rowHeight = UITableViewAutomaticDimension
+    
+    //refresh control
+    forecastTableView.refreshControl = UIRefreshControl()
+    forecastTableView.refreshControl?.tintColor = UIColor.blue
+    forecastTableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+    
+    //selection
+    forecastTableView.allowsSelection = false
   }
   
   override func viewDidLayoutSubviews() {
@@ -143,6 +172,7 @@ extension ForecastViewController {
 }
 
 
+//MARK: - tableview
 extension ForecastViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {

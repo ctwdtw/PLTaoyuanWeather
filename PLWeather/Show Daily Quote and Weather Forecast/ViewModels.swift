@@ -16,11 +16,11 @@ struct DisplayedWeather {
   let displayedIconDescription: String
   
   init(_ displayedDate: String,
-         weekDay: String,
-         dayOrNight: String,
-         hightestTemprature: String,
-         lowestTemprature: String,
-         iconDescription: String) {
+       weekDay: String,
+       dayOrNight: String,
+       hightestTemprature: String,
+       lowestTemprature: String,
+       iconDescription: String) {
     
     self.displayedDate = displayedDate
     self.displayedWeekDay = weekDay
@@ -40,9 +40,37 @@ struct DisplayedForecast {
 }
 
 struct DisplayedError {
+  let timeStamp: Double = Date().timeIntervalSince1970
   let shouldShow: Bool //show the error by UI or just print it in console
   let title: String
   let errorMessage: String
+  
+  func isContentEqual(to error: DisplayedError) -> Bool {
+    return
+      self.shouldShow == error.shouldShow &&
+        self.title == error.title &&
+        self.errorMessage == error.errorMessage
+  }
+  
+}
+
+extension DisplayedError: Equatable {
+  static func == (lhs: DisplayedError, rhs: DisplayedError) -> Bool {
+    return
+      lhs.timeStamp == rhs.timeStamp &&
+      lhs.shouldShow == rhs.shouldShow &&
+      lhs.title == rhs.title &&
+      lhs.errorMessage == rhs.errorMessage
+  }
+  
+  static func != (lhs: DisplayedError, rhs: DisplayedError) -> Bool {
+    return
+      lhs.timeStamp != rhs.timeStamp ||
+      lhs.shouldShow != rhs.shouldShow ||
+        lhs.title != rhs.title ||
+        lhs.errorMessage != rhs.errorMessage
+  }
+  
 }
 
 struct DisplayedQuote {
@@ -61,37 +89,37 @@ struct ForecastQuoteViewModel {
   var displayedForecast: DisplayedForecast?
   var displayedError: DisplayedError?
   
-//  init(_ displayedQuote: DisplayedQuote? = nil,
-//       _ displayedForecast: DisplayedForecast? = nil,
-//       _ displayedError: DisplayedError? = nil) {
-//    self.displayedQuote = displayedQuote
-//    self.displayedForecast = displayedForecast
-//    self.displayedError = displayedError
-//  }
-//  
-//  init(_ displayedQuote: DisplayedQuote?,
-//        displayedForecast: DisplayedForecast?,
-//        displayedError: DisplayedError?) {
-//    self.displayedQuote = displayedQuote
-//    self.displayedForecast = displayedForecast
-//    self.displayedError = displayedError
-//  }
-//  
-//  init( displayedQuote: DisplayedQuote?,
-//       _ displayedForecast: DisplayedForecast?,
-//       displayedError: DisplayedError?) {
-//    self.displayedQuote = displayedQuote
-//    self.displayedForecast = displayedForecast
-//    self.displayedError = displayedError
-//  }
-//  
-//  init( _ displayedQuote: DisplayedQuote?,
-//          displayedForecast: DisplayedForecast?,
-//        _ displayedError: DisplayedError?) {
-//    self.displayedQuote = displayedQuote
-//    self.displayedForecast = displayedForecast
-//    self.displayedError = displayedError
-//  }
+  //  init(_ displayedQuote: DisplayedQuote? = nil,
+  //       _ displayedForecast: DisplayedForecast? = nil,
+  //       _ displayedError: DisplayedError? = nil) {
+  //    self.displayedQuote = displayedQuote
+  //    self.displayedForecast = displayedForecast
+  //    self.displayedError = displayedError
+  //  }
+  //
+  //  init(_ displayedQuote: DisplayedQuote?,
+  //        displayedForecast: DisplayedForecast?,
+  //        displayedError: DisplayedError?) {
+  //    self.displayedQuote = displayedQuote
+  //    self.displayedForecast = displayedForecast
+  //    self.displayedError = displayedError
+  //  }
+  //
+  //  init( displayedQuote: DisplayedQuote?,
+  //       _ displayedForecast: DisplayedForecast?,
+  //       displayedError: DisplayedError?) {
+  //    self.displayedQuote = displayedQuote
+  //    self.displayedForecast = displayedForecast
+  //    self.displayedError = displayedError
+  //  }
+  //
+  //  init( _ displayedQuote: DisplayedQuote?,
+  //          displayedForecast: DisplayedForecast?,
+  //        _ displayedError: DisplayedError?) {
+  //    self.displayedQuote = displayedQuote
+  //    self.displayedForecast = displayedForecast
+  //    self.displayedError = displayedError
+  //  }
   
   init(displayedQuote: DisplayedQuote? = nil,
        displayedForecast: DisplayedForecast? = nil,

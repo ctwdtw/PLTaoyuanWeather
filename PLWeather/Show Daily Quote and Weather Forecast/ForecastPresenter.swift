@@ -41,11 +41,11 @@ class ForecastPresenter {
       return ForecastQuoteViewModel(displayedForecast: df, displayedError: de)
       
     } else if let qe = quoteError {
-      let de = DisplayedError(shouldShow: false, title: qe.domain, errorMessage: qe.localizedDescription)
+      let de = DisplayedError(shouldShow: true, title: qe.domain, errorMessage: qe.localizedDescription)
       return ForecastQuoteViewModel(displayedError: de)
       
     } else if let fe = forecastError {
-      let de = DisplayedError(shouldShow: false, title: fe.domain, errorMessage: fe.localizedDescription)
+      let de = DisplayedError(shouldShow: true, title: fe.domain, errorMessage: fe.localizedDescription)
       return ForecastQuoteViewModel(displayedError: de)
       
     } else if updatedQuote == nil, oldQuote == nil, quoteError == nil,

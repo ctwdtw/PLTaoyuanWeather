@@ -18,38 +18,46 @@ class ForecastPresenter {
                                  forecastError: PLErrorProtocol?) -> ForecastQuoteViewModel {
     
     if let quote = updatedQuote, let forecast = updatedForecast, quoteError == nil, forecastError == nil {
+      //fetch locally success
       let dq = getDisplayedQuote(from: quote)
       let df = getDisplayedForecast(from: forecast)
       return ForecastQuoteViewModel(displayedQuote: dq, displayedForecast: df)
       
     } else if let quote = updatedQuote, quoteError == nil {
+      // fetch remote quote success
       let dq = getDisplayedQuote(from: quote)
       return ForecastQuoteViewModel(displayedQuote: dq)
       
     } else if let forecast = updatedForecast, forecastError == nil {
+      //fetch remote forecast success
       let df = getDisplayedForecast(from: forecast)
       return ForecastQuoteViewModel(displayedForecast: df)
       
     } else if let qe = quoteError as? CoreDataError, case .noNeedToUpdateQuote = qe {
+      //no need update quote
       let de = DisplayedError(shouldShow: false, title: qe.domain, errorMessage: qe.localizedDescription)
       let dq = oldQuote == nil ? DisplayedQuote.empty() : getDisplayedQuote(from: oldQuote!)
       return ForecastQuoteViewModel(displayedQuote: dq, displayedError: de)
       
     } else if let fe = forecastError as? CoreDataError, case .noNeedToUpdateForecast = fe {
+      // no need update forecast
       let de = DisplayedError(shouldShow: false, title: fe.domain, errorMessage: fe.localizedDescription)
       let df = oldForecast == nil ? DisplayedForecast.empty() : getDisplayedForecast(from: oldForecast!)
       return ForecastQuoteViewModel(displayedForecast: df, displayedError: de)
       
     } else if let qe = quoteError {
+      //fetch remote quote error
       let de = DisplayedError(shouldShow: true, title: qe.domain, errorMessage: qe.localizedDescription)
       return ForecastQuoteViewModel(displayedError: de)
       
     } else if let fe = forecastError {
+      //fetch remote forecast error
       let de = DisplayedError(shouldShow: true, title: fe.domain, errorMessage: fe.localizedDescription)
       return ForecastQuoteViewModel(displayedError: de)
       
     } else if updatedQuote == nil, oldQuote == nil, quoteError == nil,
               updatedForecast == nil, oldForecast == nil, forecastError == nil{
+      //first time start app, fetch data locally
       let dq = DisplayedQuote.empty()
       let df = DisplayedForecast.empty()
       return ForecastQuoteViewModel(displayedQuote: dq, displayedForecast: df)

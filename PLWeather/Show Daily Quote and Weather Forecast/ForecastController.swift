@@ -63,7 +63,6 @@ extension ForecastController {
   
   func fetchLocalData(completion: @escaping (ForecastQuoteViewModel) -> Void) {
     localStore.fetchDaliyQuote { [weak self] (quote, quoteError) in
-      
       self?.localStore.fetchForecast { [weak self] (forecast, forecastError) in
         
         self?.quote = quote
@@ -96,8 +95,10 @@ extension ForecastController {
   }
   
   
-  private func updateLocalData(completion: @escaping (Quote?, PLErrorProtocol?, Forecast?, PLErrorProtocol?) -> Void) {
-    
+  private func updateLocalData(completion: @escaping (Quote?,
+                                                      PLErrorProtocol?,
+                                                      Forecast?,
+                                                      PLErrorProtocol?) -> Void) {
     var quote: Quote? = nil
     var forecast: Forecast? = nil
     var quoteUpdatedError: PLErrorProtocol? = nil
@@ -132,7 +133,8 @@ extension ForecastController {
     
   }
   
-  private func updateLocalForecast(completion: @escaping (Forecast?, PLErrorProtocol?) -> Void) {
+  private func updateLocalForecast(completion: @escaping (Forecast?,
+                                                          PLErrorProtocol?) -> Void) {
     isUpdatingLocalForecast = true
     remoteStore.fetchForecast { [weak self] (forecast, error) in
       guard let remoteForecast = forecast else {
@@ -158,7 +160,8 @@ extension ForecastController {
     }
   }
   
-  private func updateLocalQuote(completion: @escaping (Quote?, PLErrorProtocol?) -> Void) {
+  private func updateLocalQuote(completion: @escaping (Quote?,
+                                                       PLErrorProtocol?) -> Void) {
     isUpdatingLocalQuote = true
     remoteStore.fetchDaliyQuote { [weak self] (quote, error) in
       guard let remoteQuote = quote else {

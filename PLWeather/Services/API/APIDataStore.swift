@@ -59,6 +59,7 @@ extension APIDataStore: ForecastStoreProtocol {
       
       do {
         let forecast = try ForecastParser.getParsedForecast(from: xmlString)
+        sleep(3)
         DispatchQueue.main.async {
           completion(forecast, nil)
         }
@@ -85,6 +86,7 @@ extension APIDataStore: ForecastStoreProtocol {
       
       do {
         let quote = try ForecastParser.getParsedDailyQuote(from: htmlString)
+        sleep(5)
         DispatchQueue.main.async {
           completion(quote, nil)
         }
@@ -121,7 +123,6 @@ extension APIDataStore {
     //.request(weatherUrlString).validate().responseString(encoding: .utf8) { (response) in
     manager.requestWithoutCache(weatherUrlString, method: .get, parameters: nil, encoding: URLEncoding.default, headers: nil)
       .validate().responseString(queue: DispatchQueue.global(), encoding: .utf8) { (response) in
-    
       if let value = response.result.value {
         completion(value, nil)
       } else if let error = response.result.error {

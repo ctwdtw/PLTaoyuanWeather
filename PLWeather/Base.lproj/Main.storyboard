@@ -80,7 +80,7 @@
                     <navigationItem key="navigationItem" id="dBR-WB-IDf">
                         <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="r5z-mJ-eDe">
                             <connections>
-                                <action selector="refreshData" destination="BYZ-38-t0r" id="Csa-oj-biK"/>
+                                <action selector="refreshDataBtnDidPressed" destination="BYZ-38-t0r" id="Csa-oj-biK"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -88,7 +88,6 @@
                         <outlet property="authorLabel" destination="d1g-MB-sej" id="ncF-KF-9fT"/>
                         <outlet property="cultureDateTimeLabel" destination="eip-6z-UFX" id="30t-Y1-aFZ"/>
                         <outlet property="dailyQuoteLabel" destination="drZ-d3-xph" id="Chb-AD-6CJ"/>
-                        <outlet property="dailyQuoteTableHeaderView" destination="0l8-zm-w3V" id="Azw-To-Qp0"/>
                         <outlet property="dateTimeLabel" destination="0Mv-Ru-EcH" id="ZBE-kh-ui0"/>
                         <outlet property="forecastTableView" destination="3ae-cc-cKE" id="F0x-rP-cki"/>
                     </connections>
@@ -96,6 +95,34 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1416.8" y="-42.728635682158924"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="w5V-XO-mYv">
+            <objects>
+                <viewController id="8Bh-9u-agl" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="mFI-ua-pnh">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="YuB-Qm-lxI" customClass="LoadingView" customModule="PLWeather" customModuleProvider="target">
+                                <rect key="frame" x="31" y="187" width="240" height="84"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="ZGp-Y3-AXv" firstAttribute="bottom" secondItem="YuB-Qm-lxI" secondAttribute="bottom" constant="396" id="RKY-W8-L2E"/>
+                            <constraint firstItem="YuB-Qm-lxI" firstAttribute="leading" secondItem="ZGp-Y3-AXv" secondAttribute="leading" constant="31" id="hXh-7o-zuw"/>
+                            <constraint firstItem="YuB-Qm-lxI" firstAttribute="top" secondItem="ZGp-Y3-AXv" secondAttribute="top" constant="123" id="owa-PJ-Uqj"/>
+                            <constraint firstItem="ZGp-Y3-AXv" firstAttribute="trailing" secondItem="YuB-Qm-lxI" secondAttribute="trailing" constant="104" id="xjP-jh-1On"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="ZGp-Y3-AXv"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="NqT-Ow-UrD"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="rn5-QG-mTe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3492" y="75.112443778110944"/>
         </scene>
         <!--View Controller-->
         <scene sceneID="CzI-xN-p1q">
@@ -106,8 +133,8 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="1a4-qq-1hb">
-                                <rect key="frame" x="44" y="112" width="46" height="30"/>
-                                <state key="normal" title="Button"/>
+                                <rect key="frame" x="141.5" y="350.5" width="92" height="30"/>
+                                <state key="normal" title="桃園天氣預報"/>
                                 <connections>
                                     <segue destination="BYZ-38-t0r" kind="show" id="kvV-le-PiZ"/>
                                 </connections>
@@ -115,9 +142,8 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="1a4-qq-1hb" secondAttribute="trailing" constant="20" symbolic="YES" id="Eun-M8-ikR"/>
-                            <constraint firstItem="1a4-qq-1hb" firstAttribute="top" secondItem="sWj-JM-mbS" secondAttribute="top" constant="48" id="cdd-am-uyV"/>
-                            <constraint firstItem="1a4-qq-1hb" firstAttribute="leading" secondItem="sWj-JM-mbS" secondAttribute="leading" constant="44" id="s9E-Bc-g2p"/>
+                            <constraint firstItem="1a4-qq-1hb" firstAttribute="centerY" secondItem="sWj-JM-mbS" secondAttribute="centerY" id="QKa-2b-Nb7"/>
+                            <constraint firstItem="1a4-qq-1hb" firstAttribute="centerX" secondItem="sWj-JM-mbS" secondAttribute="centerX" id="tMY-mf-sg0"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="sWj-JM-mbS"/>
                     </view>
@@ -144,6 +170,24 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nza-4B-xnV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-84" y="-41.829085457271368"/>
+        </scene>
+        <!--Navigation Controller-->
+        <scene sceneID="G3a-96-v87">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="tf5-XJ-qhC" sceneMemberID="viewController">
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="AFK-KF-4KK">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="8Bh-9u-agl" kind="relationship" relationship="rootViewController" id="2so-Rg-i37"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="hwF-GY-zTe" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2552.8000000000002" y="75.112443778110944"/>
         </scene>
     </scenes>
 </document>

@@ -8,24 +8,98 @@
 
 import UIKit
 
+
+
 class ForecastViewController: UIViewController {
   @IBOutlet weak var cultureDateTimeLabel: UILabel!
   @IBOutlet weak var dateTimeLabel: UILabel!
   @IBOutlet weak var dailyQuoteLabel: UILabel!
   @IBOutlet weak var authorLabel: UILabel!
-  @IBOutlet private weak var dailyQuoteTableHeaderView: UIView!
-  @IBOutlet private weak var forecastTableView: UITableView!
   
+  @IBOutlet private weak var forecastTableView: UITableView!
   private let forecastController = ForecastController()
   private var displayedForecast: DisplayedForecast?
   private var errorsToBeDisplayed: [DisplayedError] = []
-  
   deinit {
     deinitMessage(from: self)
   }
+}
+
+//MARK: - Life Cycle
+extension ForecastViewController {
+  override func loadView() {
+    super.loadView()
+  }
+  
+  override func viewDidLoad() {
+    super.viewDidLoad()
+    configureForcastTableView()
+    forecastTableView.showLoadingView()
+    
+    forecastController.fetchLocalData { [weak self] (forecastQuoteVM) in
+      if let error = forecastQuoteVM.displayedError {
+        self?.displayError(error)
+        
+      } else {
+        self?.reloadQuoteViews(with: forecastQuoteVM)
+        self?.reloadForecastTableView(with: forecastQuoteVM)
+        
+      }
+      
+      self?.forecastTableView.hideLoadingView()
+      self?.refreshDataBtnDidPressed()
+      
+    }
+    
+  }
+  
+  override func viewDidLayoutSubviews() {
+    super.viewDidLayoutSubviews()
+    layoutTableHeaderView()
+  }
+  
+  private func layoutTableHeaderView() {
+    guard let headerView = forecastTableView.tableHeaderView else {
+      return
+    }
+    
+    let size = headerView.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
+    
+    if headerView.frame.size.height != size.height {
+      headerView.frame.size.height = size.height
+      
+      forecastTableView.tableHeaderView = headerView
+      forecastTableView.layoutIfNeeded()
+    }
+  }
   
   
-  //MARK:/ - display logic
+  private func configureForcastTableView() {
+    //delegate
+    forecastTableView.delegate = self
+    forecastTableView.dataSource = self
+    
+    //layout
+    forecastTableView.register(R.nib.forecastTableViewCell)
+    forecastTableView.estimatedRowHeight = 200
+    forecastTableView.rowHeight = UITableViewAutomaticDimension
+    
+    //refresh control
+    /*
+    forecastTableView.refreshControl = UIRefreshControl()
+    forecastTableView.refreshControl?.tintColor = UIColor.blue
+    forecastTableView.refreshControl?.addTarget(self, action: #selector(pullToRefreshData), for: .valueChanged)*/
+    
+    //selection
+    forecastTableView.allowsSelection = false
+  }
+  
+  
+}
+
+//MARK: - Display logic
+extension ForecastViewController {
+  
   func displayError(_ error: DisplayedError) {
     
     guard error.shouldShow else {
@@ -43,7 +117,7 @@ class ForecastViewController: UIViewController {
     if errorsToBeDisplayed.count == 0 { //隊伍裡沒人
       errorsToBeDisplayed.append(error)
       showAlertError(error, okHandler: okHandler)
-    
+      
     } else if errorsToBeDisplayed.index(of: error) == 0 { //隊伍裡我第一個
       showAlertError(error, okHandler: okHandler)
       
@@ -64,28 +138,55 @@ class ForecastViewController: UIViewController {
         isDuplicated = true
         break
       }
-
+      
     }
     return isDuplicated
   }
   
+  private func showRemoteLoadingView() {
+    guard let navigationBar = navigationController?.navigationBar else {
+      return
+    }
+    navigationBar.showLoadingView()
+    
+  }
   
-  //MARK: - user request
-  @objc @IBAction func refreshData() {
-    forecastController.refreshData { [weak self] (weatherQuoteVM) in
-      self?.forecastTableView.refreshControl?.endRefreshing()
-      self?.forecastTableView.setContentOffset(CGPoint.zero, animated: true)// work around
-      
-      if let error = weatherQuoteVM.displayedError {
+  private func hideRemoteLoadingView() {
+    guard let navigationBar = navigationController?.navigationBar else {
+      return
+    }
+    navigationBar.hideLoadingView()
+  }
+  
+
+}
+
+//MARK: - User Request
+extension ForecastViewController {
+  @IBAction func refreshDataBtnDidPressed() {
+    showRemoteLoadingView()
+    forecastController.refreshData { [weak self] (forecastQuoteVM) in
+      if let error = forecastQuoteVM.displayedError,
+        forecastQuoteVM.erroredDataType == .quote {
         self?.displayError(error)
       
+      } else if let error = forecastQuoteVM.displayedError,
+        forecastQuoteVM.erroredDataType == .forecast {
+        self?.displayError(error)
+        
       } else {
-        self?.reloadQuoteViews(with: weatherQuoteVM)
-        self?.reloadForecastTableView(with: weatherQuoteVM)
-      
+        self?.reloadQuoteViews(with: forecastQuoteVM)
+        self?.reloadForecastTableView(with: forecastQuoteVM)
+        
       }
+      self?.hideRemoteLoadingView()
       
     }
+  }
+  
+  
+  @objc func pullToRefreshData() {
+    
   }
   
   private func reloadQuoteViews(with vm: ForecastQuoteViewModel) {
@@ -108,71 +209,10 @@ class ForecastViewController: UIViewController {
     self.displayedForecast = displayedForecast
     forecastTableView.reloadData()
   }
-  
-  
+
 }
 
-//Life Cycle
-extension ForecastViewController {
-  override func viewDidLoad() {
-    super.viewDidLoad()
-    
-    configureForcastTableView()
-    
-    forecastController.fetchLocalData { [weak self] (weatherQuoteVM) in
-      if let error = weatherQuoteVM.displayedError {
-        self?.displayError(error)
-        
-      } else {
-        self?.reloadQuoteViews(with: weatherQuoteVM)
-        self?.reloadForecastTableView(with: weatherQuoteVM)
-        self?.refreshData() //after local data fetched and displayed, check if there is remote data to be download
-      }
-    
-    }
-    
-  }
-  
-  private func configureForcastTableView() {
-    //delegate
-    forecastTableView.delegate = self
-    forecastTableView.dataSource = self
-    
-    //layout
-    forecastTableView.register(R.nib.forecastTableViewCell)
-    forecastTableView.estimatedRowHeight = 200
-    forecastTableView.rowHeight = UITableViewAutomaticDimension
-    
-    //refresh control
-    forecastTableView.refreshControl = UIRefreshControl()
-    forecastTableView.refreshControl?.tintColor = UIColor.blue
-    forecastTableView.refreshControl?.addTarget(self, action: #selector(refreshData), for: .valueChanged)
-    
-    //selection
-    forecastTableView.allowsSelection = false
-  }
-  
-  override func viewDidLayoutSubviews() {
-    super.viewDidLayoutSubviews()
-    guard let headerView = forecastTableView.tableHeaderView else {
-      return
-    }
-    
-    let size = headerView.systemLayoutSizeFitting(UILayoutFittingCompressedSize)
-    
-    if headerView.frame.size.height != size.height {
-      headerView.frame.size.height = size.height
-      
-      forecastTableView.tableHeaderView = headerView
-      forecastTableView.layoutIfNeeded()
-    }
-    
-  }
-  
-}
-
-
-//MARK: - tableview
+//MARK: - Table View Delegate
 extension ForecastViewController: UITableViewDelegate {
   func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
     if editingStyle == .delete {
@@ -192,6 +232,7 @@ extension ForecastViewController: UITableViewDelegate {
   }
 }
 
+//MARK: - Table View Data Source
 extension ForecastViewController: UITableViewDataSource {
   func numberOfSections(in tableView: UITableView) -> Int {
     return 1

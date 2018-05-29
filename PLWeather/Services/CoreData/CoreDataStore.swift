@@ -142,6 +142,7 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
         
         if let managedForecast = try context.fetch(request).first {
           let forecast = managedForecast.toForecast()
+          
           DispatchQueue.main.async {
             completion(forecast, nil)
           }
@@ -222,6 +223,7 @@ extension CoreDataStore: ForecastLocalStoreProtocol {
         
         if let managedQuote = try context.fetch(request).first {
           let quote = managedQuote.toQuote()
+          sleep(2)
           DispatchQueue.main.async {
             completion(quote, nil)
           }

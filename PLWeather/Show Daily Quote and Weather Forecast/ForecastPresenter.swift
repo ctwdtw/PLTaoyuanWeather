@@ -37,23 +37,23 @@ class ForecastPresenter {
       //no need update quote
       let de = DisplayedError(shouldShow: false, title: qe.domain, errorMessage: qe.localizedDescription)
       let dq = oldQuote == nil ? DisplayedQuote.empty() : getDisplayedQuote(from: oldQuote!)
-      return ForecastQuoteViewModel(displayedQuote: dq, displayedError: de)
+      return ForecastQuoteViewModel(displayedQuote: dq, displayedError: de, erroredDataType: .quote)
       
     } else if let fe = forecastError as? CoreDataError, case .noNeedToUpdateForecast = fe {
       // no need update forecast
       let de = DisplayedError(shouldShow: false, title: fe.domain, errorMessage: fe.localizedDescription)
       let df = oldForecast == nil ? DisplayedForecast.empty() : getDisplayedForecast(from: oldForecast!)
-      return ForecastQuoteViewModel(displayedForecast: df, displayedError: de)
+      return ForecastQuoteViewModel(displayedForecast: df, displayedError: de, erroredDataType: .forecast)
       
     } else if let qe = quoteError {
       //fetch remote quote error
       let de = DisplayedError(shouldShow: true, title: qe.domain, errorMessage: qe.localizedDescription)
-      return ForecastQuoteViewModel(displayedError: de)
+      return ForecastQuoteViewModel(displayedError: de, erroredDataType: .quote)
       
     } else if let fe = forecastError {
       //fetch remote forecast error
       let de = DisplayedError(shouldShow: true, title: fe.domain, errorMessage: fe.localizedDescription)
-      return ForecastQuoteViewModel(displayedError: de)
+      return ForecastQuoteViewModel(displayedError: de, erroredDataType: .forecast)
       
     } else if updatedQuote == nil, oldQuote == nil, quoteError == nil,
               updatedForecast == nil, oldForecast == nil, forecastError == nil{

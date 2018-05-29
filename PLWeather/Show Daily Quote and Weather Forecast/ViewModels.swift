@@ -88,45 +88,25 @@ struct ForecastQuoteViewModel {
   var displayedQuote: DisplayedQuote?
   var displayedForecast: DisplayedForecast?
   var displayedError: DisplayedError?
-  
-  //  init(_ displayedQuote: DisplayedQuote? = nil,
-  //       _ displayedForecast: DisplayedForecast? = nil,
-  //       _ displayedError: DisplayedError? = nil) {
-  //    self.displayedQuote = displayedQuote
-  //    self.displayedForecast = displayedForecast
-  //    self.displayedError = displayedError
-  //  }
-  //
-  //  init(_ displayedQuote: DisplayedQuote?,
-  //        displayedForecast: DisplayedForecast?,
-  //        displayedError: DisplayedError?) {
-  //    self.displayedQuote = displayedQuote
-  //    self.displayedForecast = displayedForecast
-  //    self.displayedError = displayedError
-  //  }
-  //
-  //  init( displayedQuote: DisplayedQuote?,
-  //       _ displayedForecast: DisplayedForecast?,
-  //       displayedError: DisplayedError?) {
-  //    self.displayedQuote = displayedQuote
-  //    self.displayedForecast = displayedForecast
-  //    self.displayedError = displayedError
-  //  }
-  //
-  //  init( _ displayedQuote: DisplayedQuote?,
-  //          displayedForecast: DisplayedForecast?,
-  //        _ displayedError: DisplayedError?) {
-  //    self.displayedQuote = displayedQuote
-  //    self.displayedForecast = displayedForecast
-  //    self.displayedError = displayedError
-  //  }
+  var erroredDataType: ErroredDataType
+  //FIXME: - 補丁
+  enum ErroredDataType {
+    case forecast
+    case quote
+    case none
+  }
   
   init(displayedQuote: DisplayedQuote? = nil,
        displayedForecast: DisplayedForecast? = nil,
-       displayedError: DisplayedError? = nil) {
+       displayedError: DisplayedError? = nil,
+       erroredDataType: ErroredDataType = .none) {
     self.displayedQuote = displayedQuote
     self.displayedForecast = displayedForecast
     self.displayedError = displayedError
+    self.erroredDataType = erroredDataType
   }
+  
+  
+  
   
 }
